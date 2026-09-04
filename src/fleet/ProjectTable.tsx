@@ -242,12 +242,12 @@ function ProjectTableRow({
           {/* Sized to the row's text, and inheriting its colour from the
               button so hover and pinned states are one CSS concern. */}
           <svg
-            width="18"
-            height="18"
+            width="19"
+            height="19"
             viewBox="0 0 25 25"
             fill={row.pinned ? 'currentColor' : 'none'}
             stroke="currentColor"
-            strokeWidth="1.2"
+            strokeWidth="1.5"
             aria-hidden="true"
           >
             <path d="M12.5 4.5l2.4 5.2 5.6.7-4.1 3.9 1.1 5.7-5-2.9-5 2.9 1.1-5.7L4.5 10.4l5.6-.7z" />

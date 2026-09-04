@@ -183,7 +183,24 @@ body {
 }
 
 .fleet-table__pin button.is-pinned {
-  color: var(--card-badge-caution-dot-color, #f5a623);
+  /* A pin is a deliberate mark, so it reads at full strength rather than as a
+     tinted variant of the idle star. */
+  color: #f9b23b;
+  opacity: 1;
+}
+
+/*
+ * Focus is shown to keyboard users only. A pointer click was leaving a boxy
+ * outline around the star that read as a button border.
+ */
+.fleet-table button:focus {
+  outline: none;
+}
+
+.fleet-table button:focus-visible {
+  outline: 2px solid var(--card-focus-ring-color, #6a7bff);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .fleet-table__row:hover {
