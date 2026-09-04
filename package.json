@@ -15,9 +15,12 @@
     "sanity"
   ],
   "dependencies": {
+    "@fontsource/inter": "^5.3.0",
+    "@sanity/icons": "^5.2.1",
     "@sanity/sdk": "^3.1.0",
     "@sanity/sdk-react": "^3.1.0",
     "@sanity/ui": "^4.0.7",
+    "@tanstack/react-table": "^9.2.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "styled-components": "^6.5.3"

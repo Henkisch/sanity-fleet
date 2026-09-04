@@ -32,16 +32,40 @@ export function isQueryable(project: ProjectRecord): boolean {
   return !project.isDisabled && !project.isDisabledByUser && !project.isBlocked
 }
 
-/** The projects a view should render, in display order. */
+function toQueryable({id, displayName, organizationId}: ProjectRecord): QueryableProject {
+  return {id, displayName, organizationId}
+}
+
+function byName(a: QueryableProject, b: QueryableProject): number {
+  return a.displayName.localeCompare(b.displayName, 'sv')
+}
+
+/**
+ * The projects a view should render, in display order.
+ *
+ * Hidden projects are excluded unless the user is peeking at them, which is
+ * the point of hiding: a deprecated project should cost nothing — no card, no
+ * query, no row in a cross-project list.
+ */
 export function visibleProjects(
   projects: readonly ProjectRecord[],
   prefs: Prefs,
 ): QueryableProject[] {
   return projects
     .filter(isQueryable)
-    .filter(
-      (project) => prefs.visibleProjects.length === 0 || prefs.visibleProjects.includes(project.id),
-    )
-    .sort((a, b) => a.displayName.localeCompare(b.displayName, 'sv'))
-    .map(({id, displayName, organizationId}) => ({id, displayName, organizationId}))
+    .filter((project) => prefs.showHidden || !prefs.hiddenProjects.includes(project.id))
+    .map(toQueryable)
+    .sort(byName)
+}
+
+/** The projects the user has hidden, for the "hidden" section of the rail. */
+export function hiddenProjects(
+  projects: readonly ProjectRecord[],
+  prefs: Prefs,
+): QueryableProject[] {
+  return projects
+    .filter(isQueryable)
+    .filter((project) => prefs.hiddenProjects.includes(project.id))
+    .map(toQueryable)
+    .sort(byName)
 }

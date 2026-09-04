@@ -1,6 +1,19 @@
 import {SanityApp} from '@sanity/sdk-react'
 import {Card, Flex, Spinner, ThemeProvider, usePrefersDark} from '@sanity/ui'
 import {buildTheme} from '@sanity/ui/theme'
+/*
+ * Self-hosted, like Studio: a webfont fetched from a CDN at runtime may never
+ * arrive, and the whole interface silently falls back to the system stack.
+ *
+ * The static package, not the variable one: `@fontsource-variable/inter`
+ * registers the family as "Inter Variable", which never matches the theme's
+ * request for "Inter" — the faces load and go unused. Weights match the ones
+ * Sanity's own interface loads.
+ */
+import '@fontsource/inter/400.css'
+import '@fontsource/inter/500.css'
+import '@fontsource/inter/600.css'
+import '@fontsource/inter/700.css'
 import '@sanity/ui/styles.css'
 import './global.css'
 import type {JSX} from 'react'

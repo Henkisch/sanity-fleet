@@ -60,12 +60,16 @@ export const RECENT_QUERY = `*[
 ] | order(_updatedAt desc)[0...$limit]${ROW_PROJECTION}`
 
 /**
- * Cross-project search.
+ * Cross-project document search.
  *
- * Fleet has no schema knowledge, so this matches the field names that carry a
- * human-readable label in practically every Sanity schema. Documents that title
- * themselves through some other field will not match — accepted limitation for
- * v1; per-project schema awareness is a later concern.
+ * This is not Sanity's search: there is no relevance ranking and no full-text
+ * index behind it. Fleet has no schema knowledge, so it matches the field names
+ * that carry a human-readable label in practically every Sanity schema, and a
+ * document that titles itself through some other field will not appear.
+ *
+ * It earns its place anyway — searching across projects is the one thing a
+ * Studio structurally cannot do — but the interface calls it "find documents"
+ * rather than "search" so nobody reads a miss as an absence.
  */
 export const SEARCH_QUERY = `*[
   ${CONTENT} && (

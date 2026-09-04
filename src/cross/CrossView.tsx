@@ -7,13 +7,13 @@
  * a global sort would mean holding every section's data in a parent and losing
  * the per-project Suspense that keeps a slow project from blocking the rest.
  */
-import {useProjects, useQuery} from '@sanity/sdk-react'
-import {Card, Heading, Stack, Text} from '@sanity/ui'
-import {Suspense, useMemo, type JSX} from 'react'
+import {useQuery} from '@sanity/sdk-react'
+import {Card, Stack, Text} from '@sanity/ui'
+import {Suspense, type JSX} from 'react'
 import {LIST_LIMIT} from '../config'
 import {assumedDataset} from '../lib/datasets'
 import {usePrefs} from '../lib/PrefsContext'
-import {visibleProjects} from '../lib/projects'
+import type {QueryableProject} from '../lib/projects'
 import {staleBefore} from '../lib/format'
 import {DRAFTS_QUERY, SEARCH_QUERY, STALE_QUERY, type DocumentRow} from '../lib/queries'
 import {DocumentList} from '../ui/DocumentList'
@@ -24,22 +24,13 @@ export type CrossMode = 'drafts' | 'stale' | 'search'
 
 interface CrossViewProps {
   mode: CrossMode
+  /** The projects to fan out across — already scoped by the caller. */
+  projects: QueryableProject[]
   /** Search term; ignored by the drafts and stale modes. */
   query?: string
 }
 
-const HEADINGS: Record<CrossMode, string> = {
-  drafts: 'Drafts waiting across all projects',
-  stale: 'Stale documents across all projects',
-  search: 'Search across all projects',
-}
-
-export function CrossView({mode, query = ''}: CrossViewProps): JSX.Element {
-  const {prefs} = usePrefs()
-  const {data: projects} = useProjects()
-
-  const visible = useMemo(() => visibleProjects(projects, prefs), [projects, prefs])
-
+export function CrossView({mode, projects, query = ''}: CrossViewProps): JSX.Element {
   if (mode === 'search' && query.trim().length < 2) {
     return (
       <Card padding={5} radius={3} tone="transparent">
@@ -52,8 +43,7 @@ export function CrossView({mode, query = ''}: CrossViewProps): JSX.Element {
 
   return (
     <Stack gap={5}>
-      <Heading size={1}>{HEADINGS[mode]}</Heading>
-      {visible.map((project) => (
+      {projects.map((project) => (
         <ErrorBoundary
           key={project.id}
           fallback={(error) => <InlineUnavailable title={project.displayName} error={error} />}
