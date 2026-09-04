@@ -66,7 +66,7 @@ export function ContentArea({route, navigate}: ContentAreaProps): JSX.Element {
                 aria-controls="view-panel"
                 label={view.label}
                 selected={route.view === view.id}
-                padding={4}
+                padding={3}
                 onClick={() => navigate({scope: route.scope, view: view.id})}
               />
             ))}
