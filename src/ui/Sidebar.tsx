@@ -201,7 +201,7 @@ function NavItem({
       padding={0}
       radius={2}
       tone={selected ? 'primary' : 'default'}
-      pressed={selected}
+      selected={selected}
       className="nav-item"
       style={{background: selected ? undefined : 'transparent'}}
     >
