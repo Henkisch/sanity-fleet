@@ -4,9 +4,9 @@
  * A route is two independent choices: **what** you are looking at (a scope —
  * everything, one organization, one project) and **which view** of it
  * (overview, drafts, stale). Keeping them separate is what lets "drafts" mean
- * "drafts in Kodamera" when an organization is selected, rather than a
- * permanently global list — the reason those views do not belong in the
- * navigation rail.
+ * "drafts in the selected organization" when an organization is selected,
+ * rather than a permanently global list — the reason those views do not
+ * belong in the navigation rail.
  *
  *   #/                         overview, everything
  *   #/drafts                   drafts, everything

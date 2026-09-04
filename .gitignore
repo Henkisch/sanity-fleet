@@ -27,6 +27,9 @@
 
 # Dotenv and similar local-only files
 *.local
+.env
+.env.*
+!.env.example
 
 # Disposable git worktrees created by tooling — never part of the repo
 /.claude/worktrees
