@@ -26,8 +26,8 @@ What was verified while building the first slice, and what still needs a browser
 
 ## Verified against live projects (HTTP query API, this account's token)
 
-Ran `SIGNALS_QUERY`, `DRAFTS_QUERY` and `SEARCH_QUERY` against `r9er1and`, `drm7rjff` and
-`uw01vee2`, dataset `production`, `perspective=raw`:
+Ran `SIGNALS_QUERY`, `DRAFTS_QUERY` and `SEARCH_QUERY` against three projects in two
+organizations, dataset `production`, `perspective=raw`:
 
 - Counts and drafts resolve correctly; `perspective=raw` is required to see drafts and
   published documents in one query.
@@ -44,10 +44,10 @@ Ran `SIGNALS_QUERY`, `DRAFTS_QUERY` and `SEARCH_QUERY` against `r9er1and`, `drm7
 The Chrome extension was not connected in this session, and the Dashboard requires an
 interactive Sanity login, so these are open:
 
-1. **Cross-org reach.** This account belongs to two organizations (`o7aI6GMzu` personal,
-   `o99pNvlw4` Kodamera). The app is deployed under the personal org. Auth docs say Dashboard
-   mode injects a *global* user token, so Kodamera projects should render — confirm in the
-   browser. The fleet view already groups by organization, which makes this obvious at a glance.
+1. **Cross-org reach.** This account belongs to two organizations (one personal, one agency).
+   The app is deployed under the personal org. Auth docs say Dashboard mode injects a *global*
+   user token, so the agency org's projects should render — confirm in the browser. The fleet
+   view already groups by organization, which makes this obvious at a glance.
 2. **Independent card failure.** A project the user cannot read should fail inside its own
    card (`ErrorBoundary` per card), not blank the grid.
 3. **Live updates.** Editing a document in a Studio should move the corresponding card's
