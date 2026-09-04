@@ -12,22 +12,34 @@ update your row when done.
 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
-| 001 | Give the repo named typecheck and lint commands | P1 | S | — | DONE — approved, awaiting merge |
-| 002 | Delete the card grid and the unused Meta primitive | P2 | S | 001 | DONE — approved, awaiting merge |
-| 003 | Put the rail, the tabs and the table on one vertical rhythm | P1 | S | 001 | DONE — approved (1 deviation), awaiting merge |
-| 004 | Make the rail navigable by keyboard and screen reader | P1 | S | 001, 003 | BLOCKED — needs 003 merged first (same file) |
-| 005 | Move the organization and project identifiers out of the repo | P2 | S | 001 | DONE — approved, awaiting merge |
-| 006 | Show each project's draft count in the rail | P3 | M | 003, 004 | BLOCKED — needs 003 and 004 merged first |
-| 007 | Spike a ⌘K project switcher | P3 | M | 001 | HELD — deliverable is a human verdict, see note |
+| 001 | Give the repo named typecheck and lint commands | P1 | S | — | MERGED |
+| 002 | Delete the card grid and the unused Meta primitive | P2 | S | 001 | MERGED |
+| 003 | Put the rail, the tabs and the table on one vertical rhythm | P1 | S | 001 | MERGED |
+| 004 | Make the rail navigable by keyboard and screen reader | P1 | S | 001, 003 | MERGED |
+| 005 | Move the organization and project identifiers out of the repo | P2 | S | 001 | MERGED |
+| 006 | Show each project's draft count in the rail | P3 | M | 003, 004 | MERGED |
+| 007 | Spike a ⌘K project switcher | P3 | M | 001 | DEFERRED — not in the first iteration |
+| 008 | Widen the rail and tighten the shell's horizontal padding | P2 | S | 001, 003 | MERGED |
+| 009 | Use Sanity UI's `selected` state for the active rail row | P2 | S | 006 | MERGED |
+| 010 | Give the active rail row Sanity's solid primary fill | P2 | S | 009 | MERGED |
 
-Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
-REJECTED (with one-line rationale).
+Status values: TODO | IN PROGRESS | DONE | MERGED | DEFERRED | BLOCKED |
+REJECTED (each with a one-line reason).
 
-## Executed 2026-09-04 — branches awaiting the owner's merge
+**All merged plans are on `main` as of 2026-09-04** and verified there: typecheck,
+lint and build pass, and the running app was measured (active rail row
+`rgb(98,121,253)`, rail row 36px, table row 44px, rail 280px, `<nav>` landmark
+present with one `aria-current`, 18 projects loading).
 
-Each plan ran in its own disposable git worktree. Nothing was merged, pushed, or
-committed to the owner's branch; that decision is theirs. Every done criterion
-below was re-run by the reviewer, not taken from the executor's report.
+## Executed and merged 2026-09-04
+
+Each plan ran in its own disposable git worktree; every done criterion was
+re-run by the reviewer rather than taken from the executor's report. All were
+then merged to `main` at the owner's instruction.
+
+Because each later branch merged its predecessors, `advisor/010-rail-solid-active`
+carried the whole UI stack (001, 003, 004, 006, 008, 009); merging it plus 002
+and 005 landed everything.
 
 | Plan | Branch | Commits | Notes |
 |------|--------|---------|-------|
