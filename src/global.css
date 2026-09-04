@@ -308,3 +308,22 @@ body {
 .nav-item.nav-item > * {
   min-height: inherit;
 }
+
+/*
+ * The active row takes Sanity's solid primary fill, matching the Dashboard's
+ * own active navigation item. Sanity UI's Card renders `selected` as a dark
+ * surface in the dark scheme — surfaces stay dark — so the solid colour has to
+ * come from the theme's own custom property rather than from a Card prop. The
+ * selector is doubled for the same reason as the height rule above: styled-
+ * components injects after this file and would otherwise win on source order.
+ * Matched as a bare attribute because Sanity UI's Card emits
+ * `data-selected=""` (empty string) from its own `selected` prop; an ='true'
+ * match never fires.
+ */
+.nav-item.nav-item[data-selected] {
+  background: var(--card-badge-primary-dot-color, #6279fd);
+}
+
+.nav-item.nav-item[data-selected] * {
+  color: var(--card-bg-color, #13141b);
+}
