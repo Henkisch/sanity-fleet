@@ -178,8 +178,11 @@ function Header({
   const [term, setTerm] = useState(route.q ?? '')
   const [searchOpen, setSearchOpen] = useState(false)
 
+  // The header's right inset is the content padding plus the toolbar's own, so
+  // the search field lands on the same edge as the toolbar controls beneath it
+  // rather than a dozen pixels short of them.
   return (
-    <Card borderBottom paddingX={3} paddingY={2} style={{flex: 'none'}}>
+    <Card borderBottom paddingLeft={3} paddingRight={5} paddingY={2} style={{flex: 'none'}}>
       <Flex align="center" gap={2}>
         {isMobile && (
           <Button
