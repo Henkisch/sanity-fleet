@@ -185,6 +185,8 @@ function NavItem({
             paddingRight={1}
             paddingY={2}
             style={{
+              display: 'flex',
+              alignItems: 'center',
               background: 'transparent',
               border: 0,
               color: 'inherit',
@@ -210,6 +212,8 @@ function NavItem({
           paddingLeft={icon ? 1 : indented ? 5 : 3}
           paddingRight={action ? 1 : 2}
           style={{
+            display: 'flex',
+            alignItems: 'center',
             background: 'transparent',
             border: 0,
             cursor: 'pointer',
@@ -248,6 +252,8 @@ function NavItem({
             paddingX={2}
             paddingY={2}
             style={{
+              display: 'flex',
+              alignItems: 'center',
               background: 'transparent',
               border: 0,
               cursor: 'pointer',
