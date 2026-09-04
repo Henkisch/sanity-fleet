@@ -52,83 +52,89 @@ export function Sidebar({
   const activeOrgId = route.scope.kind === 'organization' ? route.scope.id : null
 
   return (
-    <Stack gap={4} paddingY={3} paddingX={2}>
-      <NavItem
-        icon={<ThLargeIcon />}
-        label="All projects"
-        selected={route.scope.kind === 'all'}
-        onClick={() => navigate({scope: {kind: 'all'}, view: route.view})}
-      />
+    <nav aria-label="Projects">
+      <Stack gap={4} paddingY={3} paddingX={2}>
+        <NavItem
+          icon={<ThLargeIcon />}
+          label="All projects"
+          selected={route.scope.kind === 'all'}
+          onClick={() => navigate({scope: {kind: 'all'}, view: route.view})}
+        />
 
-      {organizations.map((org) => {
-        const expanded = expandedOrgs.includes(org.id)
+        {organizations.map((org) => {
+          const expanded = expandedOrgs.includes(org.id)
 
-        return (
-          <Stack key={org.id} gap={1}>
+          return (
+            <Stack key={org.id} gap={1}>
+              <NavItem
+                icon={expanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
+                label={org.name}
+                badge={String(org.projects.length)}
+                selected={activeOrgId === org.id}
+                onIconClick={() => onToggleOrg(org.id)}
+                iconLabel={expanded ? `Collapse ${org.name}` : `Expand ${org.name}`}
+                expanded={expanded}
+                onClick={() => {
+                  if (!expanded) onToggleOrg(org.id)
+                  navigate({scope: {kind: 'organization', id: org.id}, view: route.view})
+                }}
+              />
+
+              {expanded &&
+                org.projects.map((project) => (
+                  <NavItem
+                    key={project.id}
+                    label={project.displayName}
+                    indented
+                    selected={activeProjectId === project.id}
+                    onClick={() =>
+                      navigate({scope: {kind: 'project', id: project.id}, view: route.view})
+                    }
+                    action={{
+                      icon: <EyeClosedIcon />,
+                      title: `Hide ${project.displayName}`,
+                      onClick: () => onSetHidden(project.id, true),
+                    }}
+                  />
+                ))}
+            </Stack>
+          )
+        })}
+
+        {hidden.length > 0 && (
+          <Stack gap={1}>
             <NavItem
-              icon={expanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
-              label={org.name}
-              badge={String(org.projects.length)}
-              selected={activeOrgId === org.id}
-              onIconClick={() => onToggleOrg(org.id)}
-              onClick={() => {
-                if (!expanded) onToggleOrg(org.id)
-                navigate({scope: {kind: 'organization', id: org.id}, view: route.view})
-              }}
+              icon={showHidden ? <EyeOpenIcon /> : <EyeClosedIcon />}
+              label="Hidden"
+              badge={String(hidden.length)}
+              muted
+              selected={false}
+              expanded={showHidden}
+              iconLabel={showHidden ? 'Hide hidden projects' : 'Show hidden projects'}
+              onClick={() => onToggleShowHidden(!showHidden)}
             />
-
-            {expanded &&
-              org.projects.map((project) => (
+            {showHidden &&
+              hidden.map((project) => (
                 <NavItem
                   key={project.id}
                   label={project.displayName}
                   indented
+                  muted
                   selected={activeProjectId === project.id}
                   onClick={() =>
                     navigate({scope: {kind: 'project', id: project.id}, view: route.view})
                   }
                   action={{
-                    icon: <EyeClosedIcon />,
-                    title: `Hide ${project.displayName}`,
-                    onClick: () => onSetHidden(project.id, true),
+                    icon: <EyeOpenIcon />,
+                    title: `Show ${project.displayName} again`,
+                    onClick: () => onSetHidden(project.id, false),
                   }}
                 />
               ))}
           </Stack>
-        )
-      })}
-
-      {hidden.length > 0 && (
-        <Stack gap={1}>
-          <NavItem
-            icon={showHidden ? <EyeOpenIcon /> : <EyeClosedIcon />}
-            label="Hidden"
-            badge={String(hidden.length)}
-            muted
-            selected={false}
-            onClick={() => onToggleShowHidden(!showHidden)}
-          />
-          {showHidden &&
-            hidden.map((project) => (
-              <NavItem
-                key={project.id}
-                label={project.displayName}
-                indented
-                muted
-                selected={activeProjectId === project.id}
-                onClick={() =>
-                  navigate({scope: {kind: 'project', id: project.id}, view: route.view})
-                }
-                action={{
-                  icon: <EyeOpenIcon />,
-                  title: `Show ${project.displayName} again`,
-                  onClick: () => onSetHidden(project.id, false),
-                }}
-              />
-            ))}
-        </Stack>
-      )}
-    </Stack>
+        )}
+      </Stack>
+    </nav>
   )
 }
 
@@ -147,6 +153,8 @@ function NavItem({
   indented,
   onClick,
   onIconClick,
+  iconLabel,
+  expanded,
   action,
 }: {
   icon?: ReactNode
@@ -158,6 +166,10 @@ function NavItem({
   onClick: () => void
   /** When set, the icon toggles instead of navigating (fold without moving). */
   onIconClick?: () => void
+  /** Accessible name for the icon button, when it toggles instead of navigating. */
+  iconLabel?: string
+  /** Disclosure state of whatever this row controls, if it controls one. */
+  expanded?: boolean
   action?: NavAction
 }) {
   return (
@@ -181,6 +193,8 @@ function NavItem({
                   }
                 : undefined
             }
+            aria-label={onIconClick ? iconLabel : undefined}
+            aria-expanded={onIconClick && expanded !== undefined ? expanded : undefined}
             paddingLeft={2}
             paddingRight={1}
             paddingY={2}
@@ -208,6 +222,8 @@ function NavItem({
           as="button"
           flex={1}
           onClick={onClick}
+          aria-current={selected ? 'page' : undefined}
+          aria-expanded={!onIconClick && expanded !== undefined ? expanded : undefined}
           paddingY={2}
           paddingLeft={icon ? 1 : indented ? 5 : 3}
           paddingRight={action ? 1 : 2}
