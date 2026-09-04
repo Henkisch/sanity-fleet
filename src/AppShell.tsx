@@ -9,71 +9,77 @@
  * behind its own boundary: neither the header nor the content should wait on
  * navigation chrome.
  */
-import {CloseIcon} from '@sanity/icons/Close'
-import {MenuIcon} from '@sanity/icons/Menu'
-import {SearchIcon} from '@sanity/icons/Search'
-import {useOrganizations, useProjects} from '@sanity/sdk-react'
-import {Box, Button, Card, Flex, Stack, Text, TextInput} from '@sanity/ui'
-import {Suspense, useEffect, useMemo, useState, type JSX} from 'react'
-import {ContentArea} from './ContentArea'
-import {SignalsProvider, useSignals} from './fleet/SignalsStore'
-import {usePrefs} from './lib/PrefsContext'
-import {hiddenProjects, visibleProjects} from './lib/projects'
-import {useIsMobile} from './lib/useViewport'
-import {useRoute, type Route} from './routes'
-import {ErrorBoundary} from './ui/ErrorBoundary'
-import {CardSkeleton, ErrorCard, SkeletonLine} from './ui/primitives'
-import {FleetMark} from './ui/FleetMark'
-import {Sidebar} from './ui/Sidebar'
+import { CloseIcon } from "@sanity/icons/Close";
+import { MenuIcon } from "@sanity/icons/Menu";
+import { SearchIcon } from "@sanity/icons/Search";
+import { useOrganizations, useProjects } from "@sanity/sdk-react";
+import { Box, Button, Card, Flex, Stack, Text, TextInput } from "@sanity/ui";
+import { Suspense, useEffect, useMemo, useState, type JSX } from "react";
+import { ContentArea } from "./ContentArea";
+import { SignalsProvider, useSignals } from "./fleet/SignalsStore";
+import { usePrefs } from "./lib/PrefsContext";
+import { hiddenProjects, visibleProjects } from "./lib/projects";
+import { useIsMobile } from "./lib/useViewport";
+import { useRoute, type Route } from "./routes";
+import { ErrorBoundary } from "./ui/ErrorBoundary";
+import { CardSkeleton, ErrorCard, SkeletonLine } from "./ui/primitives";
+import { FleetMark } from "./ui/FleetMark";
+import { Sidebar } from "./ui/Sidebar";
 
-const SIDEBAR_WIDTH = 280
+const SIDEBAR_WIDTH = 280;
 
 export function AppShell(): JSX.Element {
-  const {route, navigate} = useRoute()
-  const isMobile = useIsMobile()
-  const [railOpen, setRailOpen] = useState(false)
+  const { route, navigate } = useRoute();
+  const isMobile = useIsMobile();
+  const [railOpen, setRailOpen] = useState(false);
 
   // Navigating on a phone should close the rail: it covers the content it
   // just navigated to.
-  const hash = routeKey(route)
+  const hash = routeKey(route);
   useEffect(() => {
-    setRailOpen(false)
-  }, [hash])
+    setRailOpen(false);
+  }, [hash]);
 
+  // No inset, no radius, no shadow: the app always renders inside the Sanity
+  // Dashboard, which already draws a rounded, inset frame around the iframe.
+  // Framing ourselves put a second border inside that one.
   return (
-    <Box padding={isMobile ? 0 : 2} style={{height: '100dvh'}}>
-      <Card
-        radius={isMobile ? 0 : 4}
-        shadow={isMobile ? 0 : 1}
-        style={{height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column'}}
-      >
-        <Header
-          route={route}
-          navigate={navigate}
-          isMobile={isMobile}
-          railOpen={railOpen}
-          onToggleRail={() => setRailOpen((open) => !open)}
-        />
+    <Card
+      style={{
+        height: "100dvh",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <Header
+        route={route}
+        navigate={navigate}
+        isMobile={isMobile}
+        railOpen={railOpen}
+        onToggleRail={() => setRailOpen((open) => !open)}
+      />
 
-        {/* Signals (the rail's draft badges, the table's columns) are session-
+      {/* Signals (the rail's draft badges, the table's columns) are session-
             lifetime rather than view-lifetime: the provider sits here, above
             both the rail and the content area, so a project's counts survive
             opening it and switching back. That means this boundary now waits
             on the project fetch too — the header above it still does not. */}
-        <ErrorBoundary fallback={(error) => <ErrorCard title="Fleet" error={error} />}>
-          <Suspense fallback={<ShellBodySkeleton isMobile={isMobile} />}>
-            <ShellBody
-              route={route}
-              navigate={navigate}
-              isMobile={isMobile}
-              railOpen={railOpen}
-              onCloseRail={() => setRailOpen(false)}
-            />
-          </Suspense>
-        </ErrorBoundary>
-      </Card>
-    </Box>
-  )
+      <ErrorBoundary
+        fallback={(error) => <ErrorCard title="Fleet" error={error} />}
+      >
+        <Suspense fallback={<ShellBodySkeleton isMobile={isMobile} />}>
+          <ShellBody
+            route={route}
+            navigate={navigate}
+            isMobile={isMobile}
+            railOpen={railOpen}
+            onCloseRail={() => setRailOpen(false)}
+          />
+        </Suspense>
+      </ErrorBoundary>
+    </Card>
+  );
 }
 
 function ShellBody({
@@ -83,22 +89,25 @@ function ShellBody({
   railOpen,
   onCloseRail,
 }: {
-  route: Route
-  navigate: (route: Route) => void
-  isMobile: boolean
-  railOpen: boolean
-  onCloseRail: () => void
+  route: Route;
+  navigate: (route: Route) => void;
+  isMobile: boolean;
+  railOpen: boolean;
+  onCloseRail: () => void;
 }) {
-  const {prefs} = usePrefs()
-  const {data: projects} = useProjects()
+  const { prefs } = usePrefs();
+  const { data: projects } = useProjects();
 
   // The union of what the rail can show, visible and hidden alike — hiding a
   // project removes it from the lists, not from the app, so its signals stay
   // live for the Hidden section too.
   const signalsProjects = useMemo(
-    () => [...visibleProjects(projects, prefs), ...hiddenProjects(projects, prefs)],
+    () => [
+      ...visibleProjects(projects, prefs),
+      ...hiddenProjects(projects, prefs),
+    ],
     [projects, prefs],
-  )
+  );
 
   const rail = (
     <ErrorBoundary fallback={() => null}>
@@ -106,11 +115,11 @@ function ShellBody({
         <SidebarData route={route} navigate={navigate} />
       </Suspense>
     </ErrorBoundary>
-  )
+  );
 
   return (
     <SignalsProvider projects={signalsProjects}>
-      <Flex flex={1} style={{minHeight: 0, position: 'relative'}}>
+      <Flex flex={1} style={{ minHeight: 0, position: "relative" }}>
         {isMobile ? (
           railOpen && (
             <>
@@ -118,17 +127,22 @@ function ShellBody({
                   at this width there is no room to do both. */}
               <Box
                 onClick={onCloseRail}
-                style={{position: 'absolute', inset: 0, zIndex: 1, background: 'rgba(0,0,0,0.5)'}}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  zIndex: 1,
+                  background: "rgba(0,0,0,0.5)",
+                }}
               />
               <Card
                 borderRight
                 style={{
-                  position: 'absolute',
+                  position: "absolute",
                   insetBlock: 0,
                   left: 0,
-                  width: 'min(84vw, 300px)',
+                  width: "min(84vw, 300px)",
                   zIndex: 2,
-                  overflowY: 'auto',
+                  overflowY: "auto",
                 }}
               >
                 {rail}
@@ -139,14 +153,16 @@ function ShellBody({
           <Card
             borderRight
             tone="transparent"
-            style={{width: SIDEBAR_WIDTH, flex: 'none', overflowY: 'auto'}}
+            style={{ width: SIDEBAR_WIDTH, flex: "none", overflowY: "auto" }}
           >
             {rail}
           </Card>
         )}
 
-        <Box flex={1} style={{overflowY: 'auto', minWidth: 0}}>
-          <ErrorBoundary fallback={(error) => <ErrorCard title="Fleet" error={error} />}>
+        <Box flex={1} style={{ overflowY: "auto", minWidth: 0 }}>
+          <ErrorBoundary
+            fallback={(error) => <ErrorCard title="Fleet" error={error} />}
+          >
             <Suspense
               fallback={
                 <Box padding={4}>
@@ -160,14 +176,18 @@ function ShellBody({
         </Box>
       </Flex>
     </SignalsProvider>
-  )
+  );
 }
 
-function ShellBodySkeleton({isMobile}: {isMobile: boolean}) {
+function ShellBodySkeleton({ isMobile }: { isMobile: boolean }) {
   return (
-    <Flex flex={1} style={{minHeight: 0}}>
+    <Flex flex={1} style={{ minHeight: 0 }}>
       {!isMobile && (
-        <Card borderRight tone="transparent" style={{width: SIDEBAR_WIDTH, flex: 'none'}}>
+        <Card
+          borderRight
+          tone="transparent"
+          style={{ width: SIDEBAR_WIDTH, flex: "none" }}
+        >
           <SidebarSkeleton />
         </Card>
       )}
@@ -175,41 +195,53 @@ function ShellBodySkeleton({isMobile}: {isMobile: boolean}) {
         <CardSkeleton height={200} />
       </Box>
     </Flex>
-  )
+  );
 }
 
 function routeKey(route: Route): string {
-  return `${route.scope.kind}:${'id' in route.scope ? route.scope.id : ''}:${route.view}:${route.q ?? ''}`
+  return `${route.scope.kind}:${"id" in route.scope ? route.scope.id : ""}:${route.view}:${route.q ?? ""}`;
 }
 
-function SidebarData({route, navigate}: {route: Route; navigate: (route: Route) => void}) {
-  const {prefs, update, setHidden, toggleOrg} = usePrefs()
-  const {data: projects} = useProjects()
-  const {data: organizations} = useOrganizations()
-  const signals = useSignals()
+function SidebarData({
+  route,
+  navigate,
+}: {
+  route: Route;
+  navigate: (route: Route) => void;
+}) {
+  const { prefs, update, setHidden, toggleOrg } = usePrefs();
+  const { data: projects } = useProjects();
+  const { data: organizations } = useOrganizations();
+  const signals = useSignals();
 
   const groups = useMemo(() => {
-    const visible = visibleProjects(projects, prefs)
+    const visible = visibleProjects(projects, prefs);
     return organizations
       .map((org) => ({
         id: org.id,
         name: org.name,
-        projects: visible.filter((project) => project.organizationId === org.id),
+        projects: visible.filter(
+          (project) => project.organizationId === org.id,
+        ),
       }))
-      .filter((org) => org.projects.length > 0)
-  }, [projects, organizations, prefs])
+      .filter((org) => org.projects.length > 0);
+  }, [projects, organizations, prefs]);
 
-  const hidden = useMemo(() => hiddenProjects(projects, prefs), [projects, prefs])
+  const hidden = useMemo(
+    () => hiddenProjects(projects, prefs),
+    [projects, prefs],
+  );
 
   // Loading and error entries both read as "no count yet" — the rail must
   // not render "0" for a project whose query has not answered.
   const draftCounts = useMemo(() => {
-    const counts: Record<string, number | null> = {}
+    const counts: Record<string, number | null> = {};
     for (const [projectId, entry] of Object.entries(signals)) {
-      counts[projectId] = entry.status === 'ready' ? entry.signals.drafts : null
+      counts[projectId] =
+        entry.status === "ready" ? entry.signals.drafts : null;
     }
-    return counts
-  }, [signals])
+    return counts;
+  }, [signals]);
 
   return (
     <Sidebar
@@ -218,13 +250,13 @@ function SidebarData({route, navigate}: {route: Route; navigate: (route: Route) 
       expandedOrgs={prefs.expandedOrgs}
       showHidden={prefs.showHidden}
       onToggleOrg={toggleOrg}
-      onToggleShowHidden={(showHidden) => update({showHidden})}
+      onToggleShowHidden={(showHidden) => update({ showHidden })}
       onSetHidden={setHidden}
       route={route}
       navigate={navigate}
       draftCounts={draftCounts}
     />
-  )
+  );
 }
 
 function SidebarSkeleton() {
@@ -234,7 +266,7 @@ function SidebarSkeleton() {
       <SkeletonLine width="80%" />
       <SkeletonLine width="70%" />
     </Stack>
-  )
+  );
 }
 
 function Header({
@@ -244,20 +276,26 @@ function Header({
   railOpen,
   onToggleRail,
 }: {
-  route: Route
-  navigate: (route: Route) => void
-  isMobile: boolean
-  railOpen: boolean
-  onToggleRail: () => void
+  route: Route;
+  navigate: (route: Route) => void;
+  isMobile: boolean;
+  railOpen: boolean;
+  onToggleRail: () => void;
 }) {
-  const [term, setTerm] = useState(route.q ?? '')
-  const [searchOpen, setSearchOpen] = useState(false)
+  const [term, setTerm] = useState(route.q ?? "");
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // Left inset matches the rail's own, so the mark lines up with the items
   // below it; right inset matches ContentArea's paddingX, so the search field
   // lands on the same edge as the table beneath it.
   return (
-    <Card borderBottom paddingLeft={2} paddingRight={3} paddingY={2} style={{flex: 'none'}}>
+    <Card
+      borderBottom
+      paddingLeft={2}
+      paddingRight={3}
+      paddingY={2}
+      style={{ flex: "none" }}
+    >
       <Flex align="center" gap={2}>
         {isMobile && (
           <Button
@@ -265,13 +303,17 @@ function Header({
             fontSize={1}
             padding={2}
             icon={railOpen ? CloseIcon : MenuIcon}
-            aria-label={railOpen ? 'Close navigation' : 'Open navigation'}
+            aria-label={railOpen ? "Close navigation" : "Open navigation"}
             aria-expanded={railOpen}
             onClick={onToggleRail}
           />
         )}
 
-        <Box style={isMobile ? undefined : {width: SIDEBAR_WIDTH - 24, flex: 'none'}}>
+        <Box
+          style={
+            isMobile ? undefined : { width: SIDEBAR_WIDTH - 24, flex: "none" }
+          }
+        >
           {/* Indented to sit on the same line as the rail's icons below. */}
           <Flex align="center" gap={3} paddingLeft={1}>
             <FleetMark size={20} />
@@ -300,7 +342,7 @@ function Header({
                 identity: it acts on everything, so it belongs to the app bar
                 rather than to the column it happened to sit above. */}
             <Box flex={1} />
-            <Box style={{width: 300, flex: 'none'}}>
+            <Box style={{ width: 300, flex: "none" }}>
               <SearchForm
                 term={term}
                 setTerm={setTerm}
@@ -314,11 +356,17 @@ function Header({
 
       {isMobile && searchOpen && (
         <Box paddingTop={2}>
-          <SearchForm term={term} setTerm={setTerm} navigate={navigate} placeholder="Find documents…" autoFocus />
+          <SearchForm
+            term={term}
+            setTerm={setTerm}
+            navigate={navigate}
+            placeholder="Find documents…"
+            autoFocus
+          />
         </Box>
       )}
     </Card>
-  )
+  );
 }
 
 function SearchForm({
@@ -328,17 +376,17 @@ function SearchForm({
   placeholder,
   autoFocus,
 }: {
-  term: string
-  setTerm: (value: string) => void
-  navigate: (route: Route) => void
-  placeholder: string
-  autoFocus?: boolean
+  term: string;
+  setTerm: (value: string) => void;
+  navigate: (route: Route) => void;
+  placeholder: string;
+  autoFocus?: boolean;
 }) {
   return (
     <form
       onSubmit={(event) => {
-        event.preventDefault()
-        navigate({scope: {kind: 'all'}, view: 'overview', q: term})
+        event.preventDefault();
+        navigate({ scope: { kind: "all" }, view: "overview", q: term });
       }}
     >
       <TextInput
@@ -351,5 +399,5 @@ function SearchForm({
         onChange={(event) => setTerm(event.currentTarget.value)}
       />
     </form>
-  )
+  );
 }

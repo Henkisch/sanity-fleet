@@ -44,10 +44,15 @@ organizations, dataset `production`, `perspective=raw`:
 The Chrome extension was not connected in this session, and the Dashboard requires an
 interactive Sanity login, so these are open:
 
-1. **Cross-org reach.** This account belongs to two organizations (one personal, one agency).
-   The app is deployed under the personal org. Auth docs say Dashboard mode injects a *global*
-   user token, so the agency org's projects should render — confirm in the browser. The fleet
-   view already groups by organization, which makes this obvious at a glance.
+1. **Cross-org reach — ANSWERED, and not as assumed.** The Dashboard's injected
+   token is scoped to the organization whose dashboard the app runs in. An app
+   installed in one organization lists that organization's projects only, even
+   for a user who belongs to several. Opened directly (outside the Dashboard)
+   the app uses the login-redirect flow, gets a global user token, and lists
+   every organization — which is why early testing at `localhost:3333` suggested
+   cross-org worked. Verified 2026-09-04 by loading a single dev server both
+   ways: 18 projects across two organizations direct, 12 in one organization
+   through the Dashboard. To cover a second organization, deploy there too.
 2. **Independent card failure.** A project the user cannot read should fail inside its own
    card (`ErrorBoundary` per card), not blank the grid.
 3. **Live updates.** Editing a document in a Studio should move the corresponding card's

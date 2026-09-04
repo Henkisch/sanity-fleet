@@ -175,8 +175,14 @@ There is no test runner. Verification is the three commands above plus using the
 - **Ship Inter yourself.** The theme asks for it, but a standalone app has to load it or
   everything silently falls back to the system stack. Use `@fontsource/inter`, not the
   variable package — that one registers the family as `"Inter Variable"`, which never matches.
-- **Cross-org works.** The Dashboard injects a global, user-scoped token, so an app installed
-  in one organization can read projects in another that the same user belongs to.
+- **The Dashboard's token is scoped to one organization.** An app installed in
+  organization A lists organization A's projects, even for a user who belongs to
+  several. Opened outside the Dashboard the app authenticates through the login
+  redirect instead and gets a global user token, which *does* span organizations
+  — so a direct `localhost:3333` visit shows more projects than the same build
+  shows inside the Dashboard. Verified by loading one dev server both ways.
+  To cover a second organization, deploy the app there too and switch
+  organizations in the Dashboard.
 
 ## Limitations
 

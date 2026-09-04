@@ -121,10 +121,13 @@ This bit me twice in one project.
 - **Measure the interface instead of eyeballing it.** The font problem, the
   specificity problem and a six-pixel row misalignment were all invisible to the
   eye and obvious to `getComputedStyle`.
-- **Cross-org works.** The Dashboard injects a global, user-scoped token, so an
-  app installed in one organization can read projects in another that the same
-  user belongs to. I had assumed this was a hard boundary and planned around it
-  unnecessarily.
+- **The Dashboard's token is scoped to one organization.** An app installed in
+  organization A lists that organization's projects, even for a user who belongs
+  to several. Open the same build outside the Dashboard and it authenticates
+  through the login redirect instead, gets a global user token, and lists every
+  organization — which is exactly how I fooled myself into believing cross-org
+  worked. Test inside the Dashboard, not at `localhost` directly; they are
+  different auth contexts and only one of them is what ships.
 
 ---
 
