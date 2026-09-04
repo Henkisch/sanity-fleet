@@ -56,7 +56,7 @@ export function ContentArea({route, navigate}: ContentAreaProps): JSX.Element {
   return (
     <Stack>
       <Box paddingX={4} paddingTop={4}>
-        <Stack gap={4}>
+        <Stack gap={3}>
           <ScopeHeading scope={route.scope} count={scopedProjects.length} />
           <TabList gap={1}>
             {VIEWS.map((view) => (
@@ -73,7 +73,7 @@ export function ContentArea({route, navigate}: ContentAreaProps): JSX.Element {
         </Stack>
       </Box>
 
-      <Box id="view-panel" padding={4}>
+      <Box id="view-panel" paddingX={4} paddingTop={3} paddingBottom={4}>
         <ErrorBoundary
           fallback={(error) => <ErrorPanel error={error} />}
           resetKey={`${route.scope.kind}:${'id' in route.scope ? route.scope.id : 'all'}:${route.view}`}
@@ -109,15 +109,19 @@ function ViewPanel({
 }
 
 function ScopeHeading({scope, count}: {scope: Scope; count: number}) {
+  // Title and count share a line: on a phone every stacked row is scroll
+  // between the user and the data they opened the app for.
   return (
-    <Stack gap={2}>
+    <Flex align="baseline" gap={3}>
       <Suspense fallback={<Heading size={2}>…</Heading>}>
         <ScopeTitle scope={scope} />
       </Suspense>
-      <Text size={1} muted>
-        {scope.kind === 'project' ? 'Project' : `${count} project${count === 1 ? '' : 's'}`}
-      </Text>
-    </Stack>
+      {scope.kind !== 'project' && (
+        <Text size={1} muted>
+          {count}
+        </Text>
+      )}
+    </Flex>
   )
 }
 

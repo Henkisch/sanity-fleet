@@ -176,6 +176,7 @@ function Header({
   onToggleRail: () => void
 }) {
   const [term, setTerm] = useState(route.q ?? '')
+  const [searchOpen, setSearchOpen] = useState(false)
 
   return (
     <Card borderBottom paddingX={3} paddingY={2} style={{flex: 'none'}}>
@@ -209,26 +210,67 @@ function Header({
           </Flex>
         </Box>
 
-        <Box flex={1} style={{maxWidth: 420, minWidth: 0}}>
-          <form
-            onSubmit={(event) => {
-              event.preventDefault()
-              navigate({scope: {kind: 'all'}, view: 'overview', q: term})
-            }}
-          >
-            <TextInput
+        {isMobile ? (
+          <>
+            <Box flex={1} />
+            <Button
+              mode="bleed"
               fontSize={1}
+              padding={2}
               icon={SearchIcon}
-              placeholder={isMobile ? 'Find…' : 'Find documents…'}
-              radius={2}
-              value={term}
-              onChange={(event) => setTerm(event.currentTarget.value)}
+              aria-label="Find documents"
+              aria-expanded={searchOpen}
+              onClick={() => setSearchOpen((open) => !open)}
             />
-          </form>
-        </Box>
-
-        {!isMobile && <Box flex={1} />}
+          </>
+        ) : (
+          <>
+            <Box flex={1} style={{maxWidth: 420, minWidth: 0}}>
+              <SearchForm term={term} setTerm={setTerm} navigate={navigate} placeholder="Find documents…" />
+            </Box>
+            <Box flex={1} />
+          </>
+        )}
       </Flex>
+
+      {isMobile && searchOpen && (
+        <Box paddingTop={2}>
+          <SearchForm term={term} setTerm={setTerm} navigate={navigate} placeholder="Find documents…" autoFocus />
+        </Box>
+      )}
     </Card>
+  )
+}
+
+function SearchForm({
+  term,
+  setTerm,
+  navigate,
+  placeholder,
+  autoFocus,
+}: {
+  term: string
+  setTerm: (value: string) => void
+  navigate: (route: Route) => void
+  placeholder: string
+  autoFocus?: boolean
+}) {
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault()
+        navigate({scope: {kind: 'all'}, view: 'overview', q: term})
+      }}
+    >
+      <TextInput
+        fontSize={1}
+        icon={SearchIcon}
+        placeholder={placeholder}
+        radius={2}
+        autoFocus={autoFocus}
+        value={term}
+        onChange={(event) => setTerm(event.currentTarget.value)}
+      />
+    </form>
   )
 }

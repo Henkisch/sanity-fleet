@@ -88,19 +88,22 @@ body {
 }
 
 /*
- * Cell contents are centred on the row rather than sitting on its text
- * baseline: a row mixes text, numbers and an icon button, and only vertical
- * centring lines all three up.
+ * Numeric columns align right, via text-align rather than flexbox: Sanity UI's
+ * Text sets its own `display`, so a `justify-content` on the cell lands on an
+ * element that is not a flex container and quietly does nothing — which left
+ * the values ranged left under right-ranged headers.
  */
-.fleet-table th > *,
-.fleet-table td > * {
-  display: flex;
-  align-items: center;
-  min-height: 24px;
+.fleet-table td {
+  vertical-align: middle;
 }
 
-.fleet-table__num > * {
-  justify-content: flex-end;
+/* Qualified with the element: the base `th, td` rule above is more specific
+   than a bare class, so an unqualified `.fleet-table__num` loses to it. */
+.fleet-table th.fleet-table__num,
+.fleet-table td.fleet-table__num,
+.fleet-table th.fleet-table__num > *,
+.fleet-table td.fleet-table__num > * {
+  text-align: right;
 }
 
 .fleet-table thead th {
@@ -136,8 +139,11 @@ body {
   padding-left: 0 !important;
 }
 
-.fleet-table__pin > * {
-  justify-content: center;
+/* Same specificity problem as the numeric columns. */
+.fleet-table th.fleet-table__pin,
+.fleet-table td.fleet-table__pin,
+.fleet-table td.fleet-table__pin > * {
+  text-align: center;
 }
 
 /*
@@ -146,6 +152,7 @@ body {
  * in a data row, a filled control reads as a form field rather than a mark.
  */
 .fleet-table__pin button {
+  margin: 0 auto;
   opacity: 0;
   transition: opacity 120ms ease, color 120ms ease;
   display: flex;
