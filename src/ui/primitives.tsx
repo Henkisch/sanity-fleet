@@ -3,7 +3,7 @@
  * views. Sanity UI supplies the visual language; these add the few shapes it
  * has no direct equivalent for.
  */
-import {Box, Card, Flex, Stack, Text} from '@sanity/ui'
+import {Box, Button, Card, Flex, Stack, Text} from '@sanity/ui'
 import type {JSX, ReactNode} from 'react'
 
 export type Health = 'ok' | 'attention' | 'unknown'
@@ -104,6 +104,19 @@ export function UnavailableCard({
         <Text size={0} muted title={raw}>
           {explain(raw)}
         </Text>
+        {corsFixUrl(raw) && (
+          <Box>
+            <Button
+              as="a"
+              href={corsFixUrl(raw) as string}
+              target="_blank"
+              rel="noreferrer"
+              fontSize={0}
+              mode="ghost"
+              text="Allow this origin"
+            />
+          </Box>
+        )}
       </Stack>
     </Card>
   )
@@ -111,6 +124,9 @@ export function UnavailableCard({
 
 /** Plain-language reading of the failures Fleet actually runs into. */
 function explain(message: string): string {
+  if (/CorsOriginError|not allowed to connect/i.test(message)) {
+    return `This project does not allow ${window.location.origin} to read its content.`
+  }
   if (/missing required grant|Unauthorized|Session not found/i.test(message)) {
     return 'No access — your role on this project cannot read this content.'
   }
@@ -118,6 +134,16 @@ function explain(message: string): string {
     return 'No dataset by that name. Open the project to pick another.'
   }
   return message
+}
+
+/**
+ * A CORS failure names the exact Manage URL that fixes it. Pulling that link
+ * out turns a dead card into a one-click repair, which matters when a fleet of
+ * twenty projects each needs the origin added once.
+ */
+function corsFixUrl(message: string): string | null {
+  const match = message.match(/https:\/\/[^\s]*cors=add[^\s]*/)
+  return match ? match[0] : null
 }
 
 /**
@@ -148,6 +174,19 @@ export function ErrorCard({title, error}: {title: string; error: unknown}): JSX.
         <Text size={0} muted title={raw}>
           {explain(raw)}
         </Text>
+        {corsFixUrl(raw) && (
+          <Box>
+            <Button
+              as="a"
+              href={corsFixUrl(raw) as string}
+              target="_blank"
+              rel="noreferrer"
+              fontSize={0}
+              mode="ghost"
+              text="Allow this origin"
+            />
+          </Box>
+        )}
       </Stack>
     </Card>
   )
