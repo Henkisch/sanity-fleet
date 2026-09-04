@@ -75,7 +75,14 @@ body {
 .fleet-table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: auto;
+  /*
+   * Fixed layout, so the numeric columns keep a measured width instead of
+   * absorbing the leftover space. Under `auto` they grew past 200px each and
+   * the right-ranged numbers ended up scattered across the row — technically
+   * aligned to their own column, visually ragged. The name column is the only
+   * one left to soak up whatever remains.
+   */
+  table-layout: fixed;
 }
 
 .fleet-table th,
@@ -95,6 +102,10 @@ body {
  */
 .fleet-table td {
   vertical-align: middle;
+}
+
+.fleet-table th.fleet-table__num {
+  width: 116px;
 }
 
 /* Qualified with the element: the base `th, td` rule above is more specific
@@ -158,7 +169,17 @@ body {
 
 .fleet-table th.fleet-table__icon,
 .fleet-table td.fleet-table__icon {
-  width: 56px;
+  width: 64px;
+}
+
+.fleet-table th.fleet-table__pin {
+  width: 52px;
+}
+
+/* The name column takes the remainder and truncates rather than wrapping. */
+.fleet-table td:first-child,
+.fleet-table th:first-child {
+  overflow: hidden;
 }
 
 /*
