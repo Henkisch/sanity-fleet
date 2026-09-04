@@ -288,3 +288,18 @@ body {
     width: 92px;
   }
 }
+
+/*
+ * A rail row matches half a table row: one rhythm across the app, and a target
+ * big enough to hit on the phone, where this rail is the whole navigation. The
+ * height sits on the row rather than on its padding because the row has three
+ * padded children — icon, label, hover action — and only a shared height makes
+ * all three fill it.
+ */
+.nav-item {
+  min-height: 36px;
+}
+
+.nav-item > * {
+  min-height: inherit;
+}
