@@ -22,6 +22,7 @@ import {useIsMobile} from './lib/useViewport'
 import {useRoute, type Route} from './routes'
 import {ErrorBoundary} from './ui/ErrorBoundary'
 import {CardSkeleton, ErrorCard, SkeletonLine} from './ui/primitives'
+import {FleetMark} from './ui/FleetMark'
 import {Sidebar} from './ui/Sidebar'
 
 const SIDEBAR_WIDTH = 236
@@ -199,15 +200,7 @@ function Header({
         <Box style={isMobile ? undefined : {width: SIDEBAR_WIDTH - 24, flex: 'none'}}>
           {/* Indented to sit on the same line as the rail's icons below. */}
           <Flex align="center" gap={3} paddingLeft={1}>
-            <Box
-              style={{
-                width: 20,
-                height: 20,
-                borderRadius: 5,
-                background: 'var(--card-badge-primary-dot-color, #6a7bff)',
-                flex: 'none',
-              }}
-            />
+            <FleetMark size={22} />
             <Text size={1} weight="semibold">
               Fleet
             </Text>

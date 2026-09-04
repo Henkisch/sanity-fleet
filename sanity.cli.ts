@@ -4,5 +4,7 @@ export default defineCliConfig({
   app: {
     organizationId: 'o7aI6GMzu',
     entry: './src/App.tsx',
+    title: 'Fleet',
+    icon: './static/icon.svg',
   },
 })
