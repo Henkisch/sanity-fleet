@@ -19,7 +19,6 @@ import {usePrefs} from '../lib/PrefsContext'
 import type {QueryableProject} from '../lib/projects'
 import {useIsMobile} from '../lib/useViewport'
 import {ProjectTable} from './ProjectTable'
-import {SignalsProvider} from './SignalsStore'
 
 interface FleetViewProps {
   projects: QueryableProject[]
@@ -89,67 +88,65 @@ export function FleetView({projects, onOpenProject}: FleetViewProps): JSX.Elemen
   )
 
   return (
-    <SignalsProvider projects={projects}>
-      <Card radius={3} shadow={1} style={{overflow: 'hidden'}}>
-        {/*
-          Symmetric padding now that Refresh carries a border: a bordered
-          control flush against the card's edge reads as a missing inset. The
-          header's search aligns with this card's edge rather than with the
-          button inside it — outer container to outer container.
-        */}
-        <Card borderBottom paddingX={3} paddingY={2} tone="transparent">
-          {isMobile ? (
-            <Stack gap={2}>
-              <Flex align="center" gap={2}>
-                <Button
-                  fontSize={1}
-                  padding={3}
-                  mode={active ? 'default' : 'ghost'}
-                  tone={active ? 'primary' : 'default'}
-                  icon={ControlsIcon}
-                  text="Filters"
-                  aria-expanded={filtersOpen}
-                  onClick={() => setFiltersOpen((open) => !open)}
-                />
-                <Box flex={1} />
-                <Button
-                  fontSize={1}
-                  padding={3}
-                  mode="ghost"
-                  icon={RefreshIcon}
-                  aria-label="Refresh"
-                  disabled={isFetching}
-                  onClick={() => refetch()}
-                />
-              </Flex>
-
-              {filtersOpen && (
-                <Stack gap={3}>
-                  {filterField}
-                  {settings}
-                </Stack>
-              )}
-            </Stack>
-          ) : (
+    <Card radius={3} shadow={1} style={{overflow: 'hidden'}}>
+      {/*
+        Symmetric padding now that Refresh carries a border: a bordered
+        control flush against the card's edge reads as a missing inset. The
+        header's search aligns with this card's edge rather than with the
+        button inside it — outer container to outer container.
+      */}
+      <Card borderBottom paddingX={3} paddingY={2} tone="transparent">
+        {isMobile ? (
+          <Stack gap={2}>
             <Flex align="center" gap={2}>
-              {filterField}
+              <Button
+                fontSize={1}
+                padding={3}
+                mode={active ? 'default' : 'ghost'}
+                tone={active ? 'primary' : 'default'}
+                icon={ControlsIcon}
+                text="Filters"
+                aria-expanded={filtersOpen}
+                onClick={() => setFiltersOpen((open) => !open)}
+              />
               <Box flex={1} />
-              {settings}
               <Button
                 fontSize={1}
                 padding={3}
                 mode="ghost"
                 icon={RefreshIcon}
-                text={isFetching ? 'Refreshing…' : 'Refresh'}
+                aria-label="Refresh"
                 disabled={isFetching}
                 onClick={() => refetch()}
               />
             </Flex>
-          )}
-        </Card>
 
-        <ProjectTable projects={projects} filter={filter} onOpenProject={onOpenProject} />
+            {filtersOpen && (
+              <Stack gap={3}>
+                {filterField}
+                {settings}
+              </Stack>
+            )}
+          </Stack>
+        ) : (
+          <Flex align="center" gap={2}>
+            {filterField}
+            <Box flex={1} />
+            {settings}
+            <Button
+              fontSize={1}
+              padding={3}
+              mode="ghost"
+              icon={RefreshIcon}
+              text={isFetching ? 'Refreshing…' : 'Refresh'}
+              disabled={isFetching}
+              onClick={() => refetch()}
+            />
+          </Flex>
+        )}
       </Card>
-    </SignalsProvider>
+
+      <ProjectTable projects={projects} filter={filter} onOpenProject={onOpenProject} />
+    </Card>
   )
 }

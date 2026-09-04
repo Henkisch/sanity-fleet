@@ -9,7 +9,9 @@
     "build": "sanity build",
     "deploy": "sanity deploy",
     "dev": "sanity dev",
-    "start": "sanity start"
+    "lint": "eslint .",
+    "start": "sanity start",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "sanity"

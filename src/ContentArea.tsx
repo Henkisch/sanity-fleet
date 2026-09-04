@@ -55,7 +55,7 @@ export function ContentArea({route, navigate}: ContentAreaProps): JSX.Element {
 
   return (
     <Stack>
-      <Box paddingX={4} paddingTop={4}>
+      <Box paddingX={3} paddingTop={4}>
         <Stack gap={3}>
           <ScopeHeading scope={route.scope} count={scopedProjects.length} />
           <TabList gap={1}>
@@ -66,6 +66,7 @@ export function ContentArea({route, navigate}: ContentAreaProps): JSX.Element {
                 aria-controls="view-panel"
                 label={view.label}
                 selected={route.view === view.id}
+                padding={3}
                 onClick={() => navigate({scope: route.scope, view: view.id})}
               />
             ))}
@@ -73,7 +74,7 @@ export function ContentArea({route, navigate}: ContentAreaProps): JSX.Element {
         </Stack>
       </Box>
 
-      <Box id="view-panel" paddingX={4} paddingTop={3} paddingBottom={4}>
+      <Box id="view-panel" paddingX={3} paddingTop={3} paddingBottom={4}>
         <ErrorBoundary
           fallback={(error) => <ErrorPanel error={error} />}
           resetKey={`${route.scope.kind}:${'id' in route.scope ? route.scope.id : 'all'}:${route.view}`}
