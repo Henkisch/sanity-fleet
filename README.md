@@ -201,3 +201,5 @@ There is no test runner. Verification is the three commands above plus using the
 ## License
 
 [MIT](LICENSE). Fork it, deploy it to your own organization, change what you like.
+
+Built by [Henrik Larsson](https://larssonhenrik.com).

@@ -5,6 +5,11 @@
   "type": "module",
   "main": "package.json",
   "license": "MIT",
+  "author": "Henrik Larsson (https://larssonhenrik.com)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Henkisch/sanity-fleet.git"
+  },
   "scripts": {
     "build": "sanity build",
     "deploy": "sanity deploy",
