@@ -87,14 +87,16 @@ export function ProjectTable({projects, filter, onOpenProject}: ProjectTableProp
       columnHelper.columns([
         columnHelper.accessor('name', {id: 'name', header: 'Project', filterFn: 'includesString'}),
         columnHelper.accessor('drafts', {id: 'drafts', header: 'Drafts'}),
-        columnHelper.accessor('stale', {id: 'stale', header: 'Stale'}),
+        // The threshold lives in the header: a bare "Stale" count is a number
+        // whose meaning is set by a control somewhere else on the page.
+        columnHelper.accessor('stale', {id: 'stale', header: `Stale >${prefs.staleDays}d`}),
         columnHelper.accessor('total', {id: 'total', header: 'Documents'}),
         columnHelper.accessor((row) => (row.lastEditedAt ? Date.parse(row.lastEditedAt) : 0), {
           id: 'lastEditedAt',
           header: 'Last edit',
         }),
       ]),
-    [],
+    [prefs.staleDays],
   )
 
   // Explicit generics: inference falls back to the base TableFeatures/RowData
@@ -143,8 +145,16 @@ export function ProjectTable({projects, filter, onOpenProject}: ProjectTableProp
                 </th>
               )
             })}
-            <th className="fleet-table__num" aria-label="Status" />
-            <th className="fleet-table__pin" aria-label="Pinned" />
+            <th className="fleet-table__icon">
+              <Text size={1} muted weight="medium">
+                Status
+              </Text>
+            </th>
+            <th className="fleet-table__pin">
+              <Text size={1} muted weight="medium">
+                Pin
+              </Text>
+            </th>
           </tr>
         </thead>
 
@@ -214,8 +224,8 @@ function ProjectTableRow({
         )}
       </td>
 
-      <td className="fleet-table__num">
-        <Flex justify="flex-end">
+      <td className="fleet-table__icon">
+        <Flex justify="center">
           <StatusDot health={row.health} title={healthTitle(row)} />
         </Flex>
       </td>

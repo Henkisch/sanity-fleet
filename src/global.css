@@ -119,8 +119,11 @@ body {
   white-space: nowrap;
 }
 
-.fleet-table__num button,
-.fleet-table thead button {
+/*
+ * Every button inside the table is a bare control. Listing only some of them
+ * here is what left the pin wearing the browser's default grey chrome.
+ */
+.fleet-table button {
   background: transparent;
   border: 0;
   padding: 0;
@@ -139,11 +142,23 @@ body {
   padding-left: 0 !important;
 }
 
-/* Same specificity problem as the numeric columns. */
+/*
+ * The two icon columns centre their contents: a dot and a star have no reading
+ * direction to range against, and centring them lines the pair up as a unit at
+ * the end of every row.
+ */
+.fleet-table th.fleet-table__icon,
+.fleet-table td.fleet-table__icon,
 .fleet-table th.fleet-table__pin,
 .fleet-table td.fleet-table__pin,
+.fleet-table td.fleet-table__icon > *,
 .fleet-table td.fleet-table__pin > * {
   text-align: center;
+}
+
+.fleet-table th.fleet-table__icon,
+.fleet-table td.fleet-table__icon {
+  width: 56px;
 }
 
 /*
@@ -153,7 +168,9 @@ body {
  */
 .fleet-table__pin button {
   margin: 0 auto;
-  opacity: 0;
+  /* Dim rather than invisible: a control nobody can see is a control nobody
+     finds. It brightens on hover and turns solid once the row is pinned. */
+  opacity: 0.35;
   transition: opacity 120ms ease, color 120ms ease;
   display: flex;
   align-items: center;

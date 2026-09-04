@@ -13,7 +13,7 @@ import {ControlsIcon} from '@sanity/icons/Controls'
 import {RefreshIcon} from '@sanity/icons/Refresh'
 import {SearchIcon} from '@sanity/icons/Search'
 import {useProjects} from '@sanity/sdk-react'
-import {Box, Button, Card, Checkbox, Flex, Inline, Select, Stack, Text, TextInput} from '@sanity/ui'
+import {Box, Button, Card, Flex, Select, Stack, Text, TextInput} from '@sanity/ui'
 import {useState, type JSX} from 'react'
 import {usePrefs} from '../lib/PrefsContext'
 import type {QueryableProject} from '../lib/projects'
@@ -39,7 +39,7 @@ export function FleetView({projects, onOpenProject}: FleetViewProps): JSX.Elemen
 
   const controls = (
     <>
-      <Box style={isMobile ? undefined : {width: 220}}>
+      <Box style={isMobile ? undefined : {width: 200}}>
         <TextInput
           fontSize={1}
           icon={SearchIcon}
@@ -52,85 +52,92 @@ export function FleetView({projects, onOpenProject}: FleetViewProps): JSX.Elemen
         />
       </Box>
 
-      <Flex align="center" gap={2}>
-        <Checkbox
-          id="attention-only"
-          checked={prefs.attentionOnly}
-          onChange={(event) => update({attentionOnly: event.currentTarget.checked})}
-        />
-        <Text size={1} as="label" htmlFor="attention-only" muted>
-          Needs attention
-        </Text>
-      </Flex>
+      {/* A toggle rather than a checkbox: it sits among buttons and selects,
+          and a lone checkbox on a toolbar reads as an unfinished form. */}
+      <Button
+        fontSize={1}
+        padding={3}
+        mode={prefs.attentionOnly ? 'default' : 'ghost'}
+        tone={prefs.attentionOnly ? 'primary' : 'default'}
+        text="Needs attention"
+        aria-pressed={prefs.attentionOnly}
+        onClick={() => update({attentionOnly: !prefs.attentionOnly})}
+      />
 
-      <Inline gap={2}>
+      <Flex align="center" gap={2}>
         <Text size={1} muted>
           Stale after
         </Text>
-        <Select
-          fontSize={1}
-          value={String(prefs.staleDays)}
-          onChange={(event) => update({staleDays: Number(event.currentTarget.value)})}
-        >
-          <option value="30">30 days</option>
-          <option value="90">90 days</option>
-          <option value="180">180 days</option>
-          <option value="365">365 days</option>
-        </Select>
-      </Inline>
+        <Box style={{width: 116}}>
+          {/* Sets the cutoff for the Stale column and the Stale view: a
+              published document untouched for longer than this. */}
+          <Select
+            fontSize={1}
+            padding={3}
+            title="A published document counts as stale once it has gone this long without an edit"
+            value={String(prefs.staleDays)}
+            onChange={(event) => update({staleDays: Number(event.currentTarget.value)})}
+          >
+            <option value="30">30 days</option>
+            <option value="90">90 days</option>
+            <option value="180">180 days</option>
+            <option value="365">365 days</option>
+          </Select>
+        </Box>
+      </Flex>
     </>
   )
 
   return (
     <SignalsProvider projects={projects}>
-      <Stack gap={3}>
-        {isMobile ? (
-          <Stack gap={3}>
+      <Card radius={3} shadow={1} style={{overflow: 'hidden'}}>
+        <Card borderBottom padding={2} tone="transparent">
+          {isMobile ? (
+            <Stack gap={2}>
+              <Flex align="center" gap={2}>
+                <Button
+                  fontSize={1}
+                  padding={3}
+                  mode={active ? 'default' : 'ghost'}
+                  tone={active ? 'primary' : 'default'}
+                  icon={ControlsIcon}
+                  text="Filters"
+                  aria-expanded={filtersOpen}
+                  onClick={() => setFiltersOpen((open) => !open)}
+                />
+                <Box flex={1} />
+                <Button
+                  fontSize={1}
+                  padding={3}
+                  mode="bleed"
+                  icon={RefreshIcon}
+                  aria-label="Refresh"
+                  disabled={isFetching}
+                  onClick={() => refetch()}
+                />
+              </Flex>
+
+              {filtersOpen && <Stack gap={3}>{controls}</Stack>}
+            </Stack>
+          ) : (
             <Flex align="center" gap={2}>
-              <Button
-                fontSize={1}
-                mode={active ? 'default' : 'bleed'}
-                tone={active ? 'primary' : 'default'}
-                icon={ControlsIcon}
-                text="Filters"
-                aria-expanded={filtersOpen}
-                onClick={() => setFiltersOpen((open) => !open)}
-              />
+              {controls}
               <Box flex={1} />
               <Button
                 fontSize={1}
+                padding={3}
                 mode="bleed"
                 icon={RefreshIcon}
-                aria-label="Refresh"
+                text={isFetching ? 'Refreshing…' : 'Refresh'}
                 disabled={isFetching}
                 onClick={() => refetch()}
               />
             </Flex>
-
-            {filtersOpen && (
-              <Card padding={3} radius={3} tone="transparent">
-                <Stack gap={4}>{controls}</Stack>
-              </Card>
-            )}
-          </Stack>
-        ) : (
-          <Flex align="center" gap={4} wrap="wrap">
-            {controls}
-            <Box flex={1} />
-            <Button
-              fontSize={1}
-              mode="bleed"
-              text={isFetching ? 'Refreshing…' : 'Refresh'}
-              disabled={isFetching}
-              onClick={() => refetch()}
-            />
-          </Flex>
-        )}
-
-        <Card radius={3} shadow={1} style={{overflow: 'hidden'}}>
-          <ProjectTable projects={projects} filter={filter} onOpenProject={onOpenProject} />
+          )}
         </Card>
-      </Stack>
+
+        <ProjectTable projects={projects} filter={filter} onOpenProject={onOpenProject} />
+      </Card>
     </SignalsProvider>
   )
 }
