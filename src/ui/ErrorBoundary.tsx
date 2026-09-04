@@ -2,30 +2,42 @@
  * Error boundary scoped to one fan-out unit.
  *
  * Fleet queries every project independently, so a project the user cannot read
- * — or one whose dataset was renamed — must fail inside its own card and leave
- * the rest of the view intact.
+ * — or one whose dataset is named something else — must fail inside its own
+ * card and leave the rest of the view intact.
  */
 import {Component, type ErrorInfo, type ReactNode} from 'react'
 
 interface Props {
   children: ReactNode
   fallback: (error: unknown) => ReactNode
+  /** Change this to clear a caught error and try the subtree again. */
+  resetKey?: string
 }
 
 interface State {
   error: unknown
+  resetKey: string | undefined
 }
 
 export class ErrorBoundary extends Component<Props, State> {
-  state: State = {error: null}
+  state: State = {error: null, resetKey: this.props.resetKey}
 
-  static getDerivedStateFromError(error: unknown): State {
+  static getDerivedStateFromError(error: unknown): Partial<State> {
     return {error}
   }
 
+  /**
+   * Clearing on a changed `resetKey` happens here rather than in an effect so
+   * the retry renders in the same pass — an effect would show the error for a
+   * frame first.
+   */
+  static getDerivedStateFromProps(props: Props, state: State): Partial<State> | null {
+    if (props.resetKey === state.resetKey) return null
+    return {error: null, resetKey: props.resetKey}
+  }
+
   componentDidCatch(error: unknown, info: ErrorInfo): void {
-    // Surfaced in the console so a failing project is debuggable without
-    // hunting through the UI.
+    // Logged so a failing project is debuggable without hunting through the UI.
     console.error('[fleet] render failed', error, info.componentStack)
   }
 

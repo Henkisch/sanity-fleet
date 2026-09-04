@@ -7,16 +7,17 @@
  * a global sort would mean holding every section's data in a parent and losing
  * the per-project Suspense that keeps a slow project from blocking the rest.
  */
-import {useDatasets, useProjects, useQuery} from '@sanity/sdk-react'
+import {useProjects, useQuery} from '@sanity/sdk-react'
 import {Card, Heading, Stack, Text} from '@sanity/ui'
 import {Suspense, useMemo, type JSX} from 'react'
 import {LIST_LIMIT} from '../config'
-import {chooseDataset, usePrefs} from '../lib/PrefsContext'
+import {assumedDataset} from '../lib/datasets'
+import {usePrefs} from '../lib/PrefsContext'
 import {staleBefore} from '../lib/format'
 import {DRAFTS_QUERY, SEARCH_QUERY, STALE_QUERY, type DocumentRow} from '../lib/queries'
 import {DocumentList} from '../ui/DocumentList'
 import {ErrorBoundary} from '../ui/ErrorBoundary'
-import {CardSkeleton, ErrorCard} from '../ui/primitives'
+import {CardSkeleton, InlineUnavailable} from '../ui/primitives'
 
 export type CrossMode = 'drafts' | 'stale' | 'search'
 
@@ -64,10 +65,10 @@ export function CrossView({mode, query = ''}: CrossViewProps): JSX.Element {
       {visible.map((project) => (
         <ErrorBoundary
           key={project.id}
-          fallback={(error) => <ErrorCard title={project.displayName} error={error} />}
+          fallback={(error) => <InlineUnavailable title={project.displayName} error={error} />}
         >
           <Suspense fallback={<CardSkeleton height={96} />}>
-            <ProjectSection
+            <ProjectRows
               projectId={project.id}
               projectName={project.displayName}
               mode={mode}
@@ -80,50 +81,19 @@ export function CrossView({mode, query = ''}: CrossViewProps): JSX.Element {
   )
 }
 
-function ProjectSection({
-  projectId,
-  projectName,
-  mode,
-  query,
-}: {
-  projectId: string
-  projectName: string
-  mode: CrossMode
-  query: string
-}): JSX.Element | null {
-  const {prefs} = usePrefs()
-  const {data: datasets} = useDatasets({projectId})
-  const dataset = chooseDataset(datasets, projectId, prefs)
-
-  if (!dataset) return null
-
-  return (
-    <Suspense fallback={<CardSkeleton height={96} />}>
-      <ProjectRows
-        projectId={projectId}
-        projectName={projectName}
-        dataset={dataset}
-        mode={mode}
-        query={query}
-      />
-    </Suspense>
-  )
-}
-
 function ProjectRows({
   projectId,
   projectName,
-  dataset,
   mode,
   query,
 }: {
   projectId: string
   projectName: string
-  dataset: string
   mode: CrossMode
   query: string
 }): JSX.Element | null {
   const {prefs} = usePrefs()
+  const dataset = assumedDataset(projectId, prefs)
 
   const {data: rows} = useQuery<DocumentRow[]>({
     query: mode === 'drafts' ? DRAFTS_QUERY : mode === 'stale' ? STALE_QUERY : SEARCH_QUERY,

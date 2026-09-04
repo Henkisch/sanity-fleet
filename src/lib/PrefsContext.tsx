@@ -6,7 +6,6 @@
  */
 import {createContext, useCallback, useContext, useMemo, useState, type ReactNode} from 'react'
 import {defaultPrefs, readPrefs, writePrefs, type Prefs} from './prefs'
-import {PREFERRED_DATASETS} from '../config'
 
 interface PrefsContextValue {
   prefs: Prefs
@@ -37,20 +36,4 @@ export function PrefsProvider({children}: {children: ReactNode}) {
 
 export function usePrefs(): PrefsContextValue {
   return useContext(PrefsContext)
-}
-
-/**
- * The dataset to show for a project: the user's choice, else the first
- * conventional production-ish name, else whatever the project has.
- */
-export function chooseDataset(
-  available: readonly {name: string}[],
-  projectId: string,
-  prefs: Prefs,
-): string | null {
-  const names = available.map((dataset) => dataset.name)
-  const chosen = prefs.datasetByProject[projectId]
-  if (chosen && names.includes(chosen)) return chosen
-  const preferred = PREFERRED_DATASETS.find((name) => names.includes(name))
-  return preferred ?? names[0] ?? null
 }

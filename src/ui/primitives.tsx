@@ -64,17 +64,89 @@ export function SkeletonLine({width = '100%'}: {width?: string}): JSX.Element {
   )
 }
 
-/** Inline error state for one fan-out unit, so a failing project cannot blank the view. */
-export function ErrorCard({title, error}: {title: string; error: unknown}): JSX.Element {
-  const message = error instanceof Error ? error.message : String(error)
+/**
+ * Inline failure state for one fan-out unit.
+ *
+ * The API's own wording ("User is missing required grant
+ * sanity.project.datasets/read") is accurate but not useful on a card, so the
+ * common causes get a plain-language line and the raw message stays available
+ * as a tooltip.
+ */
+export function UnavailableCard({
+  title,
+  subtitle,
+  error,
+}: {
+  title: string
+  subtitle?: string
+  error: unknown
+}): JSX.Element {
+  const raw = error instanceof Error ? error.message : String(error)
+
   return (
-    <Card padding={4} radius={3} shadow={1} tone="critical">
+    <Card padding={4} radius={3} shadow={1} tone="transparent" style={{height: '100%'}}>
+      <Stack gap={3}>
+        <Flex align="center" gap={3}>
+          <Box flex={1}>
+            <Stack gap={2}>
+              <Text size={1} weight="semibold" textOverflow="ellipsis">
+                {title}
+              </Text>
+              {subtitle && (
+                <Text size={0} muted>
+                  {subtitle}
+                </Text>
+              )}
+            </Stack>
+          </Box>
+          <StatusDot health="unknown" title="Unavailable" />
+        </Flex>
+        <Text size={0} muted title={raw}>
+          {explain(raw)}
+        </Text>
+      </Stack>
+    </Card>
+  )
+}
+
+/** Plain-language reading of the failures Fleet actually runs into. */
+function explain(message: string): string {
+  if (/missing required grant|Unauthorized|Session not found/i.test(message)) {
+    return 'No access — your role on this project cannot read this content.'
+  }
+  if (/dataset/i.test(message) && /not found|does not exist/i.test(message)) {
+    return 'No dataset by that name. Open the project to pick another.'
+  }
+  return message
+}
+
+/**
+ * One muted line for a project that could not be read in a cross-project list.
+ *
+ * A full error card per project would drown the results in a fleet where the
+ * user is an editor on a handful of projects and a bystander on the rest — but
+ * silently dropping them would misrepresent the list's coverage.
+ */
+export function InlineUnavailable({title, error}: {title: string; error: unknown}): JSX.Element {
+  const raw = error instanceof Error ? error.message : String(error)
+  return (
+    <Text size={0} muted title={raw}>
+      {title} — {explain(raw)}
+    </Text>
+  )
+}
+
+/** Compact failure state for a list section. */
+export function ErrorCard({title, error}: {title: string; error: unknown}): JSX.Element {
+  const raw = error instanceof Error ? error.message : String(error)
+  return (
+    <Card padding={4} radius={3} shadow={1} tone="caution">
       <Stack gap={3}>
         <Text size={1} weight="semibold">
           {title}
         </Text>
-        <Text size={0} muted>
-          {message}
+        <Text size={0} muted title={raw}>
+          {explain(raw)}
         </Text>
       </Stack>
     </Card>
