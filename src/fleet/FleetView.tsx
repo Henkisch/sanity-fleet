@@ -37,21 +37,23 @@ export function FleetView({projects, onOpenProject}: FleetViewProps): JSX.Elemen
   // a narrowed list is never silently unexplained.
   const active = filter.length > 0 || prefs.attentionOnly
 
-  const controls = (
-    <>
-      <Box style={isMobile ? undefined : {width: 200}}>
-        <TextInput
-          fontSize={1}
-          icon={SearchIcon}
-          placeholder="Filter projects"
-          radius={2}
-          value={filter}
-          onChange={(event) => setFilter(event.currentTarget.value)}
-          onClear={() => setFilter('')}
-          clearButton={filter.length > 0}
-        />
-      </Box>
+  const filterField = (
+    <Box style={isMobile ? undefined : {width: 300}}>
+      <TextInput
+        fontSize={1}
+        icon={SearchIcon}
+        placeholder="Filter projects"
+        radius={2}
+        value={filter}
+        onChange={(event) => setFilter(event.currentTarget.value)}
+        onClear={() => setFilter('')}
+        clearButton={filter.length > 0}
+      />
+    </Box>
+  )
 
+  const settings = (
+    <>
       {/* A toggle rather than a checkbox: it sits among buttons and selects,
           and a lone checkbox on a toolbar reads as an unfinished form. */}
       <Button
@@ -117,12 +119,18 @@ export function FleetView({projects, onOpenProject}: FleetViewProps): JSX.Elemen
                 />
               </Flex>
 
-              {filtersOpen && <Stack gap={3}>{controls}</Stack>}
+              {filtersOpen && (
+                <Stack gap={3}>
+                  {filterField}
+                  {settings}
+                </Stack>
+              )}
             </Stack>
           ) : (
             <Flex align="center" gap={2}>
-              {controls}
+              {filterField}
               <Box flex={1} />
+              {settings}
               <Button
                 fontSize={1}
                 padding={3}
