@@ -4,7 +4,7 @@
  * has no direct equivalent for.
  */
 import {Badge, Box, Button, Card, Flex, Stack, Text} from '@sanity/ui'
-import type {JSX, ReactNode} from 'react'
+import type {JSX} from 'react'
 
 export type Health = 'ok' | 'attention' | 'unknown'
 
@@ -207,17 +207,5 @@ export function StatusBadge({status}: {status: 'published' | 'draft' | 'edited'}
     <Badge tone={tone} fontSize={1} padding={2} radius={2}>
       {status}
     </Badge>
-  )
-}
-
-/** Label/value pair used in card footers and detail headers. */
-export function Meta({label, children}: {label: string; children: ReactNode}): JSX.Element {
-  return (
-    <Flex align="center" gap={2}>
-      <Text size={0} muted>
-        {label}
-      </Text>
-      <Text size={0}>{children}</Text>
-    </Flex>
   )
 }
