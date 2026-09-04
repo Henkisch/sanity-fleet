@@ -200,7 +200,7 @@ function Header({
         <Box style={isMobile ? undefined : {width: SIDEBAR_WIDTH - 24, flex: 'none'}}>
           {/* Indented to sit on the same line as the rail's icons below. */}
           <Flex align="center" gap={3} paddingLeft={1}>
-            <FleetMark size={26} />
+            <FleetMark size={20} />
             <Text size={1} weight="semibold">
               Fleet
             </Text>

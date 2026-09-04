@@ -13,7 +13,7 @@ import {ControlsIcon} from '@sanity/icons/Controls'
 import {RefreshIcon} from '@sanity/icons/Refresh'
 import {SearchIcon} from '@sanity/icons/Search'
 import {useProjects} from '@sanity/sdk-react'
-import {Box, Button, Card, Flex, Select, Stack, Text, TextInput} from '@sanity/ui'
+import {Box, Button, Card, Flex, Select, Stack, TextInput} from '@sanity/ui'
 import {useState, type JSX} from 'react'
 import {usePrefs} from '../lib/PrefsContext'
 import type {QueryableProject} from '../lib/projects'
@@ -66,34 +66,38 @@ export function FleetView({projects, onOpenProject}: FleetViewProps): JSX.Elemen
         onClick={() => update({attentionOnly: !prefs.attentionOnly})}
       />
 
-      <Flex align="center" gap={2}>
-        <Text size={1} muted>
-          Stale after
-        </Text>
-        <Box style={{width: 116}}>
-          {/* Sets the cutoff for the Stale column and the Stale view: a
-              published document untouched for longer than this. */}
-          <Select
-            fontSize={1}
-            padding={3}
-            title="A published document counts as stale once it has gone this long without an edit"
-            value={String(prefs.staleDays)}
-            onChange={(event) => update({staleDays: Number(event.currentTarget.value)})}
-          >
-            <option value="30">30 days</option>
-            <option value="90">90 days</option>
-            <option value="180">180 days</option>
-            <option value="365">365 days</option>
-          </Select>
-        </Box>
-      </Flex>
+      {/*
+        The label lives in the options rather than beside the control: a bare
+        line of text between two bordered controls is what stopped the toolbar
+        reading as one unit.
+      */}
+      <Box style={{width: 152}}>
+        <Select
+          fontSize={1}
+          padding={3}
+          title="A published document counts as stale once it has gone this long without an edit"
+          value={String(prefs.staleDays)}
+          onChange={(event) => update({staleDays: Number(event.currentTarget.value)})}
+        >
+          <option value="30">Stale after 30d</option>
+          <option value="90">Stale after 90d</option>
+          <option value="180">Stale after 180d</option>
+          <option value="365">Stale after 365d</option>
+        </Select>
+      </Box>
     </>
   )
 
   return (
     <SignalsProvider projects={projects}>
       <Card radius={3} shadow={1} style={{overflow: 'hidden'}}>
-        <Card borderBottom paddingLeft={3} paddingRight={0} paddingY={2} tone="transparent">
+        {/*
+          Symmetric padding now that Refresh carries a border: a bordered
+          control flush against the card's edge reads as a missing inset. The
+          header's search aligns with this card's edge rather than with the
+          button inside it — outer container to outer container.
+        */}
+        <Card borderBottom paddingX={3} paddingY={2} tone="transparent">
           {isMobile ? (
             <Stack gap={2}>
               <Flex align="center" gap={2}>
@@ -111,7 +115,7 @@ export function FleetView({projects, onOpenProject}: FleetViewProps): JSX.Elemen
                 <Button
                   fontSize={1}
                   padding={3}
-                  mode="bleed"
+                  mode="ghost"
                   icon={RefreshIcon}
                   aria-label="Refresh"
                   disabled={isFetching}
@@ -134,7 +138,7 @@ export function FleetView({projects, onOpenProject}: FleetViewProps): JSX.Elemen
               <Button
                 fontSize={1}
                 padding={3}
-                mode="bleed"
+                mode="ghost"
                 icon={RefreshIcon}
                 text={isFetching ? 'Refreshing…' : 'Refresh'}
                 disabled={isFetching}
