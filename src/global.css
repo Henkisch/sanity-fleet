@@ -295,11 +295,16 @@ body {
  * height sits on the row rather than on its padding because the row has three
  * padded children — icon, label, hover action — and only a shared height makes
  * all three fill it.
+ *
+ * The selector is doubled on purpose. Sanity UI is styled-components, whose
+ * generated class has equal specificity and is injected after this file, so a
+ * single .nav-item loses on source order. Do not simplify this back to one
+ * class — it silently stops applying.
  */
-.nav-item {
+.nav-item.nav-item {
   min-height: 36px;
 }
 
-.nav-item > * {
+.nav-item.nav-item > * {
   min-height: inherit;
 }
