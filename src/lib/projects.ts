@@ -43,9 +43,10 @@ function byName(a: QueryableProject, b: QueryableProject): number {
 /**
  * The projects a view should render, in display order.
  *
- * Hidden projects are excluded unless the user is peeking at them, which is
- * the point of hiding: a deprecated project should cost nothing — no card, no
- * query, no row in a cross-project list.
+ * Hidden projects are always excluded here, `showHidden` or not: peeking
+ * reveals the hidden *section*, it does not fold those projects back into the
+ * organizations they came from — otherwise a peeked project appears twice, once
+ * in its organization and once under Hidden.
  */
 export function visibleProjects(
   projects: readonly ProjectRecord[],
@@ -53,7 +54,7 @@ export function visibleProjects(
 ): QueryableProject[] {
   return projects
     .filter(isQueryable)
-    .filter((project) => prefs.showHidden || !prefs.hiddenProjects.includes(project.id))
+    .filter((project) => !prefs.hiddenProjects.includes(project.id))
     .map(toQueryable)
     .sort(byName)
 }

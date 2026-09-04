@@ -224,14 +224,14 @@ function NavItem({
               <Text
                 size={1}
                 muted={muted && !selected}
-                weight={selected ? 'medium' : undefined}
+                weight="medium"
                 textOverflow="ellipsis"
               >
                 {label}
               </Text>
             </Box>
             {badge && (
-              <Text size={0} muted>
+              <Text size={1} muted>
                 {badge}
               </Text>
             )}

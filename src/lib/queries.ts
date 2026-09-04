@@ -21,12 +21,25 @@
 /** Documents a human would recognise as content. */
 const CONTENT = `!(_id in path("_.**")) && !(_type match "sanity.*") && !(_type match "system.*")`
 
-/** Fields worth showing in a list row, across schemas Fleet knows nothing about. */
+/**
+ * Fields worth showing in a list row, across schemas Fleet knows nothing about.
+ *
+ * `status` is the one Sanity concept a list of documents has to get right. A
+ * document is *published* when it has no draft, a *draft* when it has never
+ * been published, and *edited* when both versions exist — the same three states
+ * Studio shows, and they cannot be read off an id alone: `drafts.abc` only
+ * says a draft exists, not whether `abc` does. Hence the counterpart lookup.
+ */
 const ROW_PROJECTION = `{
   _id,
   _type,
   _updatedAt,
-  "title": coalesce(title, name, label, heading, slug.current, _id)
+  "title": coalesce(title, name, label, heading, slug.current, _id),
+  "status": select(
+    !(_id in path("drafts.**")) => "published",
+    count(*[_id == string::split(^._id, "drafts.")[1]]) > 0 => "edited",
+    "draft"
+  )
 }`
 
 /** Everything one project card needs, in a single round trip. */
@@ -89,12 +102,16 @@ export interface ProjectSignals {
   lastEdited: DocumentRow | null
 }
 
+/** The three states Studio shows for a document. */
+export type DocumentStatus = 'published' | 'draft' | 'edited'
+
 /** Shape returned by the list queries above. */
 export interface DocumentRow {
   _id: string
   _type: string
   _updatedAt: string
   title: string
+  status: DocumentStatus
 }
 
 /** A published document id, given a possibly-draft id. */

@@ -1,22 +1,31 @@
 /**
  * A list of documents belonging to one project/dataset.
  *
- * Fleet is read-only, so a row has exactly one action: open that document
- * where it can be edited. The whole row is the link — the point of the app is
- * getting into the right document quickly, and a row of identical buttons down
- * the right margin is noise.
+ * Built as a table, like the project list: same row rhythm, same column
+ * discipline, so moving between the two views does not feel like moving
+ * between two applications.
+ *
+ * Fleet is read-only, so a row has exactly one action — open that document
+ * where it can be edited. The whole row is the link; a column of identical
+ * buttons down the right margin is noise.
  */
-import {Box, Card, Flex, Stack, Text} from '@sanity/ui'
-import type {JSX} from 'react'
-import {relativeTime} from '../lib/format'
-import {publishedId, type DocumentRow} from '../lib/queries'
-import {manageUrl, studioDocumentUrl, useStudio} from '../lib/studios'
+import { Box, Card, Flex, Text } from "@sanity/ui";
+import type { JSX } from "react";
+import { relativeTime } from "../lib/format";
+import {
+  publishedId,
+  type DocumentRow,
+  type DocumentStatus,
+} from "../lib/queries";
+import { manageUrl, studioDocumentUrl, useStudio } from "../lib/studios";
+import { useIsMobile } from "../lib/useViewport";
+import { StatusBadge } from "./primitives";
 
 interface DocumentListProps {
-  rows: readonly DocumentRow[]
-  projectId: string
-  dataset: string
-  emptyMessage: string
+  rows: readonly DocumentRow[];
+  projectId: string;
+  dataset: string;
+  emptyMessage: string;
 }
 
 export function DocumentList({
@@ -25,7 +34,8 @@ export function DocumentList({
   dataset,
   emptyMessage,
 }: DocumentListProps): JSX.Element {
-  const studio = useStudio(projectId)
+  const studio = useStudio(projectId);
+  const isMobile = useIsMobile();
 
   if (rows.length === 0) {
     return (
@@ -34,59 +44,93 @@ export function DocumentList({
           {emptyMessage}
         </Text>
       </Card>
-    )
+    );
   }
 
   return (
-    <Stack gap={1}>
-      {rows.map((row) => (
-        <DocumentRowLink key={row._id} row={row} projectId={projectId} studio={studio} />
-      ))}
-    </Stack>
-  )
-}
+    <Card radius={3} shadow={1} style={{ overflow: "hidden" }}>
+      <Box className="fleet-table-wrap">
+        <table className="fleet-table">
+          <thead>
+            <tr>
+              <th>
+                <Text size={1} muted weight="medium">
+                  Document
+                </Text>
+              </th>
+              {!isMobile && (
+                <th>
+                  <Text size={1} muted weight="medium">
+                    Type
+                  </Text>
+                </th>
+              )}
+              <th className="fleet-table__num">
+                <Text size={1} muted weight="medium">
+                  Status
+                </Text>
+              </th>
+              <th className="fleet-table__num">
+                <Text size={1} muted weight="medium">
+                  Edited
+                </Text>
+              </th>
+            </tr>
+          </thead>
 
-function DocumentRowLink({
-  row,
-  projectId,
-  studio,
-}: {
-  row: DocumentRow
-  projectId: string
-  studio: ReturnType<typeof useStudio>
-}): JSX.Element {
-  // Drafts are addressed by their published id in Studio intents.
-  const href = studio
-    ? studioDocumentUrl(studio, publishedId(row._id), row._type)
-    : manageUrl(projectId)
+          <tbody>
+            {rows.map((row) => {
+              // Drafts are addressed by their published id in Studio intents.
+              const href = studio
+                ? studioDocumentUrl(studio, publishedId(row._id), row._type)
+                : manageUrl(projectId);
 
-  return (
-    <Card
-      as="a"
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      padding={3}
-      radius={2}
-      tone="transparent"
-      style={{textDecoration: 'none', display: 'block'}}
-    >
-      <Flex align="center" gap={3}>
-        <Box flex={1} style={{minWidth: 0}}>
-          <Stack gap={2}>
-            <Text size={1} textOverflow="ellipsis">
-              {row.title}
-            </Text>
-            <Text size={0} muted>
-              {row._type} · {relativeTime(row._updatedAt)}
-              {row._id.startsWith('drafts.') ? ' · draft' : ''}
-            </Text>
-          </Stack>
-        </Box>
-        <Text size={0} muted>
-          {studio === undefined ? '' : studio ? '↗ Studio' : '↗ Manage'}
-        </Text>
-      </Flex>
+              return (
+                <tr key={row._id} className="fleet-table__row">
+                  <td>
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="fleet-table__link"
+                    >
+                      <Text size={1} weight="medium" textOverflow="ellipsis">
+                        {row.title}
+                      </Text>
+                    </a>
+                  </td>
+
+                  {!isMobile && (
+                    <td>
+                      <Text size={1} muted textOverflow="ellipsis">
+                        {row._type}
+                      </Text>
+                    </td>
+                  )}
+
+                  <td className="fleet-table__num">
+                    <Flex justify="flex-end">
+                      <StatusBadge status={row.status} />
+                    </Flex>
+                  </td>
+
+                  <td className="fleet-table__num">
+                    <Text size={1} muted>
+                      {relativeTime(row._updatedAt)}
+                    </Text>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </Box>
+
+      <Box hidden aria-hidden="true">
+        {dataset}
+      </Box>
     </Card>
-  )
+  );
 }
+
+export type { DocumentStatus };

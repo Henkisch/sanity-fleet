@@ -11,7 +11,7 @@ import {Suspense, useMemo, type JSX} from 'react'
 import {CrossView} from './cross/CrossView'
 import {FleetView} from './fleet/FleetView'
 import {usePrefs} from './lib/PrefsContext'
-import {visibleProjects, type QueryableProject} from './lib/projects'
+import {hiddenProjects, visibleProjects, type QueryableProject} from './lib/projects'
 import {ProjectView} from './project/ProjectView'
 import type {Route, Scope, View} from './routes'
 import {ErrorBoundary} from './ui/ErrorBoundary'
@@ -32,10 +32,16 @@ export function ContentArea({route, navigate}: ContentAreaProps): JSX.Element {
   const {prefs} = usePrefs()
   const {data: projects} = useProjects()
 
-  const scopedProjects = useMemo(
-    () => projectsInScope(visibleProjects(projects, prefs), route.scope),
-    [projects, prefs, route.scope],
-  )
+  const scopedProjects = useMemo(() => {
+    // A hidden project is still reachable by URL and from the Hidden section,
+    // so scoping to one includes it — hiding removes a project from the lists,
+    // not from the app.
+    const pool =
+      route.scope.kind === 'project'
+        ? [...visibleProjects(projects, prefs), ...hiddenProjects(projects, prefs)]
+        : visibleProjects(projects, prefs)
+    return projectsInScope(pool, route.scope)
+  }, [projects, prefs, route.scope])
 
   // Search is its own destination: it spans everything by definition, so it
   // replaces the scope header rather than living inside one.
@@ -105,10 +111,10 @@ function ViewPanel({
 function ScopeHeading({scope, count}: {scope: Scope; count: number}) {
   return (
     <Stack gap={2}>
-      <Suspense fallback={<Heading size={1}>…</Heading>}>
+      <Suspense fallback={<Heading size={2}>…</Heading>}>
         <ScopeTitle scope={scope} />
       </Suspense>
-      <Text size={0} muted>
+      <Text size={1} muted>
         {scope.kind === 'project' ? 'Project' : `${count} project${count === 1 ? '' : 's'}`}
       </Text>
     </Stack>
@@ -121,14 +127,14 @@ function ScopeTitle({scope}: {scope: Scope}) {
   if (scope.kind === 'project') return <ProjectTitle projectId={scope.id} />
   if (scope.kind === 'organization') {
     const org = organizations.find((entry) => entry.id === scope.id)
-    return <Heading size={1}>{org?.name ?? 'Organization'}</Heading>
+    return <Heading size={2}>{org?.name ?? 'Organization'}</Heading>
   }
-  return <Heading size={1}>All projects</Heading>
+  return <Heading size={2}>All projects</Heading>
 }
 
 function ProjectTitle({projectId}: {projectId: string}) {
   const {data: project} = useProject({projectId})
-  return <Heading size={1}>{project.displayName}</Heading>
+  return <Heading size={2}>{project.displayName}</Heading>
 }
 
 function ErrorPanel({error}: {error: unknown}) {

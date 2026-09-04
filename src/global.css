@@ -80,10 +80,27 @@ body {
 
 .fleet-table th,
 .fleet-table td {
-  padding: 10px 12px;
+  /* Sanity's own rows breathe: 13px text on a 19px line wants more than the
+     10px of vertical padding a 10px type scale looked fine with. */
+  padding: 12px 16px;
   text-align: left;
-  vertical-align: middle;
   border-bottom: 1px solid var(--card-border-color, rgba(255, 255, 255, 0.08));
+}
+
+/*
+ * Cell contents are centred on the row rather than sitting on its text
+ * baseline: a row mixes text, numbers and an icon button, and only vertical
+ * centring lines all three up.
+ */
+.fleet-table th > *,
+.fleet-table td > * {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+.fleet-table__num > * {
+  justify-content: flex-end;
 }
 
 .fleet-table thead th {
@@ -115,21 +132,34 @@ body {
 }
 
 .fleet-table__pin {
-  width: 32px;
-  padding-right: 0 !important;
+  width: 44px;
+  padding-left: 0 !important;
 }
 
-/* A pin is permanent state, so it stays visible; the empty star only appears
-   on hover, the way the rail's hide control does. */
+.fleet-table__pin > * {
+  justify-content: center;
+}
+
+/*
+ * A pin is permanent state, so a set one stays visible; the empty star only
+ * appears on hover, the way the rail's hide control does. No button chrome —
+ * in a data row, a filled control reads as a form field rather than a mark.
+ */
 .fleet-table__pin button {
   opacity: 0;
-  transition: opacity 120ms ease;
+  transition: opacity 120ms ease, color 120ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--card-muted-fg-color, #979cb0);
 }
 
-.fleet-table__row:hover .fleet-table__pin button,
-.fleet-table__pin button.is-pinned,
-.fleet-table__pin button:focus-visible {
-  opacity: 1;
+.fleet-table__pin button:hover {
+  color: var(--card-fg-color, #e4e5e9);
+}
+
+.fleet-table__pin button.is-pinned {
+  color: var(--card-badge-caution-dot-color, #f5a623);
 }
 
 .fleet-table__row:hover {
@@ -145,4 +175,43 @@ body {
   font: inherit;
   text-align: left;
   width: 100%;
+}
+
+/* A document row is a link end to end; only the title carries the underline
+   affordance, and it inherits the row's colour. */
+.fleet-table__link {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+  min-width: 0;
+}
+
+.fleet-table__row:hover .fleet-table__link {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/*
+ * Safety net beneath the breakpoint: whatever the layout decides, a table is
+ * allowed to scroll sideways inside its own card rather than clip a column or
+ * push the page. Only this element scrolls horizontally in the whole app.
+ */
+.fleet-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fleet-table {
+  min-width: 520px;
+}
+
+@media (max-width: 900px) {
+  .fleet-table {
+    min-width: 0;
+  }
+
+  .fleet-table th,
+  .fleet-table td {
+    padding: 12px;
+  }
 }

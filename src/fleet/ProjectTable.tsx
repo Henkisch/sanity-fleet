@@ -11,8 +11,6 @@
  * Pinned projects are lifted above the sort rather than participating in it:
  * a pin is a standing instruction, not a value to order by.
  */
-import {StarIcon} from '@sanity/icons/Star'
-import {StarFilledIcon} from '@sanity/icons/StarFilled'
 import {
   columnFilteringFeature,
   columnVisibilityFeature,
@@ -25,8 +23,9 @@ import {
   tableFeatures,
   useTable,
 } from '@tanstack/react-table'
-import {Box, Flex, Stack, Text} from '@sanity/ui'
+import {Box, Flex, Text} from '@sanity/ui'
 import {useMemo, type JSX} from 'react'
+import {useIsMobile} from '../lib/useViewport'
 import {daysSince, formatCount, relativeTime} from '../lib/format'
 import {usePrefs} from '../lib/PrefsContext'
 import type {QueryableProject} from '../lib/projects'
@@ -72,6 +71,7 @@ interface ProjectTableProps {
 export function ProjectTable({projects, filter, onOpenProject}: ProjectTableProps): JSX.Element {
   const {prefs, togglePin} = usePrefs()
   const signals = useSignals()
+  const isMobile = useIsMobile()
 
   const rows = useMemo<ProjectRow[]>(() => {
     const all = projects.map((project) => toRow(project, signals[project.id], prefs.pinnedProjects))
@@ -105,7 +105,12 @@ export function ProjectTable({projects, filter, onOpenProject}: ProjectTableProp
     columns,
     data: rows,
     getRowId: (row) => row.id,
-    state: {columnFilters: filter ? [{id: 'name', value: filter}] : []},
+    state: {
+      columnFilters: filter ? [{id: 'name', value: filter}] : [],
+      // On a phone the table keeps the question it exists to answer — which
+      // project has drafts waiting — and drops the columns that are context.
+      columnVisibility: isMobile ? {stale: false, total: false, lastEditedAt: false} : {},
+    },
     initialState: {sorting: [{id: 'drafts', desc: true}]},
   })
 
@@ -122,7 +127,6 @@ export function ProjectTable({projects, filter, onOpenProject}: ProjectTableProp
       <table className="fleet-table">
         <thead>
           <tr>
-            <th className="fleet-table__pin" aria-label="Pinned" />
             {table.getHeaderGroups()[0]?.headers.map((header) => {
               const sort = header.column.getIsSorted()
               return (
@@ -131,7 +135,7 @@ export function ProjectTable({projects, filter, onOpenProject}: ProjectTableProp
                   className={header.column.id === 'name' ? undefined : 'fleet-table__num'}
                 >
                   <button type="button" onClick={header.column.getToggleSortingHandler()}>
-                    <Text size={0} muted weight="medium">
+                    <Text size={1} muted weight="medium">
                       {String(header.column.columnDef.header)}
                       {sort === 'asc' ? ' ↑' : sort === 'desc' ? ' ↓' : ''}
                     </Text>
@@ -140,6 +144,7 @@ export function ProjectTable({projects, filter, onOpenProject}: ProjectTableProp
               )
             })}
             <th className="fleet-table__num" aria-label="Status" />
+            <th className="fleet-table__pin" aria-label="Pinned" />
           </tr>
         </thead>
 
@@ -179,31 +184,17 @@ function ProjectTableRow({
 
   return (
     <tr className="fleet-table__row" style={{opacity: quiet ? 0.72 : 1}}>
-      <td className="fleet-table__pin">
-        <button
-          type="button"
-          onClick={onTogglePin}
-          title={row.pinned ? `Unpin ${row.name}` : `Pin ${row.name}`}
-          aria-label={row.pinned ? `Unpin ${row.name}` : `Pin ${row.name}`}
-          className={row.pinned ? 'is-pinned' : undefined}
-        >
-          <Text size={1} muted={!row.pinned}>
-            {row.pinned ? <StarFilledIcon /> : <StarIcon />}
-          </Text>
-        </button>
-      </td>
-
       <td>
         <button type="button" onClick={onOpen} className="fleet-table__name">
-          <Stack gap={2}>
-            <Text size={1} weight="medium" textOverflow="ellipsis">
-              {row.name}
-            </Text>
-            <Text size={0} muted>
-              {row.dataset}
-              {row.lastEditedTitle ? ` · ${row.lastEditedTitle}` : ''}
-            </Text>
-          </Stack>
+          {/*
+            The project name alone. The dataset is a constant across every row,
+            and the last-edited document's title is detail for the project's own
+            page — in a table meant for ranking, a second line of prose per row
+            is what makes eighteen rows unscannable.
+          */}
+          <Text size={1} weight="medium" textOverflow="ellipsis">
+            {row.name}
+          </Text>
         </button>
       </td>
 
@@ -227,6 +218,31 @@ function ProjectTableRow({
         <Flex justify="flex-end">
           <StatusDot health={row.health} title={healthTitle(row)} />
         </Flex>
+      </td>
+
+      <td className="fleet-table__pin">
+        <button
+          type="button"
+          onClick={onTogglePin}
+          title={row.pinned ? `Unpin ${row.name}` : `Pin ${row.name}`}
+          aria-label={row.pinned ? `Unpin ${row.name}` : `Pin ${row.name}`}
+          aria-pressed={row.pinned}
+          className={row.pinned ? 'is-pinned' : undefined}
+        >
+          {/* Sized to the row's text, and inheriting its colour from the
+              button so hover and pinned states are one CSS concern. */}
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 25 25"
+            fill={row.pinned ? 'currentColor' : 'none'}
+            stroke="currentColor"
+            strokeWidth="1.2"
+            aria-hidden="true"
+          >
+            <path d="M12.5 4.5l2.4 5.2 5.6.7-4.1 3.9 1.1 5.7-5-2.9-5 2.9 1.1-5.7L4.5 10.4l5.6-.7z" />
+          </svg>
+        </button>
       </td>
     </tr>
   )

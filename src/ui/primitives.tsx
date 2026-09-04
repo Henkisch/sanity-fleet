@@ -3,7 +3,7 @@
  * views. Sanity UI supplies the visual language; these add the few shapes it
  * has no direct equivalent for.
  */
-import {Box, Button, Card, Flex, Stack, Text} from '@sanity/ui'
+import {Badge, Box, Button, Card, Flex, Stack, Text} from '@sanity/ui'
 import type {JSX, ReactNode} from 'react'
 
 export type Health = 'ok' | 'attention' | 'unknown'
@@ -189,6 +189,24 @@ export function ErrorCard({title, error}: {title: string; error: unknown}): JSX.
         )}
       </Stack>
     </Card>
+  )
+}
+
+/**
+ * A document's publication state, in Studio's own vocabulary.
+ *
+ * Colour carries the meaning for people who read it at a glance, and the text
+ * carries it for everyone else — the three states are close enough in kind
+ * that a bare dot would be a guessing game.
+ */
+export function StatusBadge({status}: {status: 'published' | 'draft' | 'edited'}): JSX.Element {
+  const tone =
+    status === 'published' ? 'positive' : status === 'edited' ? 'caution' : 'default'
+
+  return (
+    <Badge tone={tone} fontSize={1} padding={2} radius={2}>
+      {status}
+    </Badge>
   )
 }
 
