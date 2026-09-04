@@ -103,8 +103,13 @@ per-project CORS is needed.
 ### Deploying
 
 ```sh
-pnpm deploy       # interactive, if you're an org admin/developer
+pnpm run deploy   # interactive, if you're an org admin/developer
 ```
+
+Note the `run`: `pnpm deploy` is one of pnpm's own built-in commands (it deploys
+workspace packages) and shadows this script. `pnpm start` and `pnpm test` are
+similarly reserved; `pnpm dev`, `pnpm build`, `pnpm lint` and `pnpm typecheck`
+are not, so those work either way.
 
 or unattended, in CI:
 
