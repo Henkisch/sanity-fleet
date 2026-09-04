@@ -16,6 +16,7 @@ import {useOrganizations, useProjects} from '@sanity/sdk-react'
 import {Box, Button, Card, Flex, Stack, Text, TextInput} from '@sanity/ui'
 import {Suspense, useEffect, useMemo, useState, type JSX} from 'react'
 import {ContentArea} from './ContentArea'
+import {SignalsProvider, useSignals} from './fleet/SignalsStore'
 import {usePrefs} from './lib/PrefsContext'
 import {hiddenProjects, visibleProjects} from './lib/projects'
 import {useIsMobile} from './lib/useViewport'
@@ -39,14 +40,6 @@ export function AppShell(): JSX.Element {
     setRailOpen(false)
   }, [hash])
 
-  const rail = (
-    <ErrorBoundary fallback={() => null}>
-      <Suspense fallback={<SidebarSkeleton />}>
-        <SidebarData route={route} navigate={navigate} />
-      </Suspense>
-    </ErrorBoundary>
-  )
-
   return (
     <Box padding={isMobile ? 0 : 2} style={{height: '100dvh'}}>
       <Card
@@ -62,57 +55,126 @@ export function AppShell(): JSX.Element {
           onToggleRail={() => setRailOpen((open) => !open)}
         />
 
-        <Flex flex={1} style={{minHeight: 0, position: 'relative'}}>
-          {isMobile ? (
-            railOpen && (
-              <>
-                {/* The rail overlays the content rather than displacing it —
-                    at this width there is no room to do both. */}
-                <Box
-                  onClick={() => setRailOpen(false)}
-                  style={{position: 'absolute', inset: 0, zIndex: 1, background: 'rgba(0,0,0,0.5)'}}
-                />
-                <Card
-                  borderRight
-                  style={{
-                    position: 'absolute',
-                    insetBlock: 0,
-                    left: 0,
-                    width: 'min(84vw, 300px)',
-                    zIndex: 2,
-                    overflowY: 'auto',
-                  }}
-                >
-                  {rail}
-                </Card>
-              </>
-            )
-          ) : (
-            <Card
-              borderRight
-              tone="transparent"
-              style={{width: SIDEBAR_WIDTH, flex: 'none', overflowY: 'auto'}}
-            >
-              {rail}
-            </Card>
-          )}
-
-          <Box flex={1} style={{overflowY: 'auto', minWidth: 0}}>
-            <ErrorBoundary fallback={(error) => <ErrorCard title="Fleet" error={error} />}>
-              <Suspense
-                fallback={
-                  <Box padding={4}>
-                    <CardSkeleton height={200} />
-                  </Box>
-                }
-              >
-                <ContentArea route={route} navigate={navigate} />
-              </Suspense>
-            </ErrorBoundary>
-          </Box>
-        </Flex>
+        {/* Signals (the rail's draft badges, the table's columns) are session-
+            lifetime rather than view-lifetime: the provider sits here, above
+            both the rail and the content area, so a project's counts survive
+            opening it and switching back. That means this boundary now waits
+            on the project fetch too — the header above it still does not. */}
+        <ErrorBoundary fallback={(error) => <ErrorCard title="Fleet" error={error} />}>
+          <Suspense fallback={<ShellBodySkeleton isMobile={isMobile} />}>
+            <ShellBody
+              route={route}
+              navigate={navigate}
+              isMobile={isMobile}
+              railOpen={railOpen}
+              onCloseRail={() => setRailOpen(false)}
+            />
+          </Suspense>
+        </ErrorBoundary>
       </Card>
     </Box>
+  )
+}
+
+function ShellBody({
+  route,
+  navigate,
+  isMobile,
+  railOpen,
+  onCloseRail,
+}: {
+  route: Route
+  navigate: (route: Route) => void
+  isMobile: boolean
+  railOpen: boolean
+  onCloseRail: () => void
+}) {
+  const {prefs} = usePrefs()
+  const {data: projects} = useProjects()
+
+  // The union of what the rail can show, visible and hidden alike — hiding a
+  // project removes it from the lists, not from the app, so its signals stay
+  // live for the Hidden section too.
+  const signalsProjects = useMemo(
+    () => [...visibleProjects(projects, prefs), ...hiddenProjects(projects, prefs)],
+    [projects, prefs],
+  )
+
+  const rail = (
+    <ErrorBoundary fallback={() => null}>
+      <Suspense fallback={<SidebarSkeleton />}>
+        <SidebarData route={route} navigate={navigate} />
+      </Suspense>
+    </ErrorBoundary>
+  )
+
+  return (
+    <SignalsProvider projects={signalsProjects}>
+      <Flex flex={1} style={{minHeight: 0, position: 'relative'}}>
+        {isMobile ? (
+          railOpen && (
+            <>
+              {/* The rail overlays the content rather than displacing it —
+                  at this width there is no room to do both. */}
+              <Box
+                onClick={onCloseRail}
+                style={{position: 'absolute', inset: 0, zIndex: 1, background: 'rgba(0,0,0,0.5)'}}
+              />
+              <Card
+                borderRight
+                style={{
+                  position: 'absolute',
+                  insetBlock: 0,
+                  left: 0,
+                  width: 'min(84vw, 300px)',
+                  zIndex: 2,
+                  overflowY: 'auto',
+                }}
+              >
+                {rail}
+              </Card>
+            </>
+          )
+        ) : (
+          <Card
+            borderRight
+            tone="transparent"
+            style={{width: SIDEBAR_WIDTH, flex: 'none', overflowY: 'auto'}}
+          >
+            {rail}
+          </Card>
+        )}
+
+        <Box flex={1} style={{overflowY: 'auto', minWidth: 0}}>
+          <ErrorBoundary fallback={(error) => <ErrorCard title="Fleet" error={error} />}>
+            <Suspense
+              fallback={
+                <Box padding={4}>
+                  <CardSkeleton height={200} />
+                </Box>
+              }
+            >
+              <ContentArea route={route} navigate={navigate} />
+            </Suspense>
+          </ErrorBoundary>
+        </Box>
+      </Flex>
+    </SignalsProvider>
+  )
+}
+
+function ShellBodySkeleton({isMobile}: {isMobile: boolean}) {
+  return (
+    <Flex flex={1} style={{minHeight: 0}}>
+      {!isMobile && (
+        <Card borderRight tone="transparent" style={{width: SIDEBAR_WIDTH, flex: 'none'}}>
+          <SidebarSkeleton />
+        </Card>
+      )}
+      <Box flex={1} padding={4}>
+        <CardSkeleton height={200} />
+      </Box>
+    </Flex>
   )
 }
 
@@ -124,6 +186,7 @@ function SidebarData({route, navigate}: {route: Route; navigate: (route: Route) 
   const {prefs, update, setHidden, toggleOrg} = usePrefs()
   const {data: projects} = useProjects()
   const {data: organizations} = useOrganizations()
+  const signals = useSignals()
 
   const groups = useMemo(() => {
     const visible = visibleProjects(projects, prefs)
@@ -138,6 +201,16 @@ function SidebarData({route, navigate}: {route: Route; navigate: (route: Route) 
 
   const hidden = useMemo(() => hiddenProjects(projects, prefs), [projects, prefs])
 
+  // Loading and error entries both read as "no count yet" — the rail must
+  // not render "0" for a project whose query has not answered.
+  const draftCounts = useMemo(() => {
+    const counts: Record<string, number | null> = {}
+    for (const [projectId, entry] of Object.entries(signals)) {
+      counts[projectId] = entry.status === 'ready' ? entry.signals.drafts : null
+    }
+    return counts
+  }, [signals])
+
   return (
     <Sidebar
       organizations={groups}
@@ -149,6 +222,7 @@ function SidebarData({route, navigate}: {route: Route; navigate: (route: Route) 
       onSetHidden={setHidden}
       route={route}
       navigate={navigate}
+      draftCounts={draftCounts}
     />
   )
 }
