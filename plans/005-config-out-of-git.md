@@ -49,7 +49,7 @@ import {defineCliConfig} from 'sanity/cli'
 
 export default defineCliConfig({
   app: {
-    organizationId: 'o7aI6GMzu',
+    organizationId: '<org-id>',
     entry: './src/App.tsx',
     title: 'Fleet',
     icon: './static/icon.svg',
@@ -65,7 +65,7 @@ This file runs in **Node**, under the Sanity CLI, at dev/build/deploy time.
 ```ts
 import type {SanityConfig} from '@sanity/sdk'
 
-const BOOTSTRAP_PROJECT_ID = process.env.SANITY_APP_BOOTSTRAP_PROJECT_ID || 'r9er1and'
+const BOOTSTRAP_PROJECT_ID = process.env.SANITY_APP_BOOTSTRAP_PROJECT_ID || '<project-id>'
 const BOOTSTRAP_DATASET = process.env.SANITY_APP_BOOTSTRAP_DATASET || 'production'
 
 export const bootstrapConfig: SanityConfig[] = [
@@ -214,7 +214,7 @@ identifier. Update the file's header comment to say the project id is required
 from the environment.
 
 **Verify**: `pnpm typecheck` → exits 0, and
-`git grep -n "r9er1and\|o7aI6GMzu" -- . ':!plans'` returns **no matches**.
+`git grep -n "<project-id>\|<org-id>" -- . ':!plans'` returns **no matches**.
 
 ### Step 5: Confirm the app still runs
 
@@ -245,7 +245,7 @@ step 5 (the app still works when the values come from the environment).
 
 ALL must hold:
 
-- [ ] `git grep -n "r9er1and\|o7aI6GMzu" -- . ':!plans'` returns no matches
+- [ ] `git grep -n "<project-id>\|<org-id>" -- . ':!plans'` returns no matches
 - [ ] `git check-ignore .env` matches a rule; `git check-ignore .env.example` does not
 - [ ] `.env.example` is tracked and contains no real identifiers
 - [ ] `pnpm typecheck` exits 0

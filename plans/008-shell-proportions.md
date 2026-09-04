@@ -28,7 +28,7 @@ Two requests from the owner, which turn out to be one problem: the shell's
 horizontal proportions are wrong at both ends.
 
 The rail is 236px. Project names truncate in it — observed in the running app:
-`nyarscupen.vercel.app (liv…`, `sanity-cache-compone…`,
+`a long project name (liv…`, `sanity-cache-compone…`,
 `sanity-next-breadcrum…`. The rail's whole job is letting someone recognise a
 project by name, and it is cutting the names off.
 
@@ -209,7 +209,7 @@ Stop and report back (do not improvise) if:
   other. It is worth a comment at both sites; make sure the header's existing
   comment still says so after your edit.
 - 280px was chosen to clear the longest observed project name
-  (`nyarscupen.vercel.app (livescore)`) at 13px Inter, including the rail's
+  (`the longest project name`) at 13px Inter, including the rail's
   indent and its hover action button. If project names get longer, the rail
   truncates again rather than growing — that is intended; the alternative is a
   rail that resizes itself.
