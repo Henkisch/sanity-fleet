@@ -133,14 +133,20 @@ body {
 /*
  * Every button inside the table is a bare control. Listing only some of them
  * here is what left the pin wearing the browser's default grey chrome.
+ *
+ * `display: block` matters as much as the colours: a button defaults to
+ * inline-block aligned on the baseline, which made the project name hang about
+ * six pixels off the numbers sharing its row.
  */
 .fleet-table button {
+  display: block;
   background: transparent;
   border: 0;
   padding: 0;
   cursor: pointer;
   color: inherit;
   font: inherit;
+  line-height: inherit;
 }
 
 .fleet-table thead th button {
@@ -188,6 +194,9 @@ body {
  * in a data row, a filled control reads as a form field rather than a mark.
  */
 .fleet-table__pin button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 0 auto;
   /* Dim rather than invisible: a control nobody can see is a control nobody
      finds. It brightens on hover and turns solid once the row is pinned. */
@@ -229,12 +238,6 @@ body {
 }
 
 .fleet-table__name {
-  background: transparent;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  color: inherit;
-  font: inherit;
   text-align: left;
   width: 100%;
 }
@@ -268,12 +271,20 @@ body {
 }
 
 @media (max-width: 900px) {
+  /*
+   * Still a floor, just a lower one. Dropping it to zero let the name column
+   * squeeze to "ko…", which is worse than a short sideways scroll.
+   */
   .fleet-table {
-    min-width: 0;
+    min-width: 440px;
   }
 
   .fleet-table th,
   .fleet-table td {
     padding: 12px;
+  }
+
+  .fleet-table th.fleet-table__num {
+    width: 92px;
   }
 }

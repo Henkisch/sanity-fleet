@@ -118,6 +118,11 @@ export function ProjectTable({projects, filter, onOpenProject}: ProjectTableProp
 
   // Pins ride above whatever sort is active: the sort answers "in what order",
   // the pin answers "regardless of that, show me these first".
+  // The head renders from TanStack, so the body must ask it which columns are
+  // visible too — hardcoded cells silently drift out of step with the header
+  // the moment a column is hidden.
+  const visible = new Set(table.getVisibleFlatColumns().map((column) => column.id))
+
   const sorted = table.getRowModel().rows
   const ordered = useMemo(
     () => [...sorted].sort((a, b) => Number(b.original.pinned) - Number(a.original.pinned)),
@@ -163,6 +168,7 @@ export function ProjectTable({projects, filter, onOpenProject}: ProjectTableProp
             <ProjectTableRow
               key={row.id}
               row={row.original}
+              visible={visible}
               onOpen={() => onOpenProject(row.original.id)}
               onTogglePin={() => togglePin(row.original.id)}
             />
@@ -183,10 +189,12 @@ export function ProjectTable({projects, filter, onOpenProject}: ProjectTableProp
 
 function ProjectTableRow({
   row,
+  visible,
   onOpen,
   onTogglePin,
 }: {
   row: ProjectRow
+  visible: Set<string>
   onOpen: () => void
   onTogglePin: () => void
 }) {
@@ -208,21 +216,19 @@ function ProjectTableRow({
         </button>
       </td>
 
-      <Cell value={row.drafts} status={row.status} emphasis={(row.drafts ?? 0) > 0} />
-      <Cell value={row.stale} status={row.status} />
-      <Cell value={row.total} status={row.status} />
+      {visible.has('drafts') && (
+        <Cell value={row.drafts} status={row.status} emphasis={(row.drafts ?? 0) > 0} />
+      )}
+      {visible.has('stale') && <Cell value={row.stale} status={row.status} />}
+      {visible.has('total') && <Cell value={row.total} status={row.status} />}
 
-      <td className="fleet-table__num">
-        {row.status === 'loading' ? (
+      {visible.has('lastEditedAt') && (
+        <td className="fleet-table__num">
           <Text size={1} muted>
-            …
+            {row.status === 'loading' ? '…' : row.lastEditedAt ? relativeTime(row.lastEditedAt) : '—'}
           </Text>
-        ) : (
-          <Text size={1} muted>
-            {row.lastEditedAt ? relativeTime(row.lastEditedAt) : '—'}
-          </Text>
-        )}
-      </td>
+        </td>
+      )}
 
       <td className="fleet-table__icon">
         <Flex justify="center">
