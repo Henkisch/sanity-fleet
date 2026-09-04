@@ -91,7 +91,7 @@ export function FleetView({projects, onOpenProject}: FleetViewProps): JSX.Elemen
   return (
     <SignalsProvider projects={projects}>
       <Card radius={3} shadow={1} style={{overflow: 'hidden'}}>
-        <Card borderBottom paddingX={3} paddingY={2} tone="transparent">
+        <Card borderBottom paddingLeft={3} paddingRight={0} paddingY={2} tone="transparent">
           {isMobile ? (
             <Stack gap={2}>
               <Flex align="center" gap={2}>

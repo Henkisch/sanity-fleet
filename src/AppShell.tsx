@@ -178,11 +178,11 @@ function Header({
   const [term, setTerm] = useState(route.q ?? '')
   const [searchOpen, setSearchOpen] = useState(false)
 
-  // The header's right inset is the content padding plus the toolbar's own, so
-  // the search field lands on the same edge as the toolbar controls beneath it
-  // rather than a dozen pixels short of them.
+  // Left inset matches the rail's own, so the mark lines up with the items
+  // below it; right inset matches the content's, so the search field lands on
+  // the same edge as the table beneath it.
   return (
-    <Card borderBottom paddingLeft={3} paddingRight={5} paddingY={2} style={{flex: 'none'}}>
+    <Card borderBottom paddingLeft={2} paddingRight={4} paddingY={2} style={{flex: 'none'}}>
       <Flex align="center" gap={2}>
         {isMobile && (
           <Button
@@ -197,7 +197,8 @@ function Header({
         )}
 
         <Box style={isMobile ? undefined : {width: SIDEBAR_WIDTH - 24, flex: 'none'}}>
-          <Flex align="center" gap={3} paddingX={2}>
+          {/* Indented to sit on the same line as the rail's icons below. */}
+          <Flex align="center" gap={3} paddingLeft={1}>
             <Box
               style={{
                 width: 20,
