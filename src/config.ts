@@ -3,13 +3,14 @@
  *
  * Fleet queries every project explicitly (each `useQuery` carries its own
  * `projectId`/`dataset`), so the `SanityApp` config below is only a bootstrap
- * resource: it gives the SDK instance a default to fall back on. Override it
- * with `SANITY_APP_BOOTSTRAP_PROJECT_ID` / `SANITY_APP_BOOTSTRAP_DATASET`.
+ * resource: it gives the SDK instance a default to fall back on. The project
+ * id is required from the environment — set `SANITY_APP_BOOTSTRAP_PROJECT_ID`
+ * (and optionally `SANITY_APP_BOOTSTRAP_DATASET`) in `.env`. See `.env.example`.
  */
 import type {SanityConfig} from '@sanity/sdk'
 
-const BOOTSTRAP_PROJECT_ID = process.env.SANITY_APP_BOOTSTRAP_PROJECT_ID || 'r9er1and'
-const BOOTSTRAP_DATASET = process.env.SANITY_APP_BOOTSTRAP_DATASET || 'production'
+const BOOTSTRAP_PROJECT_ID = process.env.SANITY_APP_BOOTSTRAP_PROJECT_ID ?? ''
+const BOOTSTRAP_DATASET = process.env.SANITY_APP_BOOTSTRAP_DATASET ?? 'production'
 
 export const bootstrapConfig: SanityConfig[] = [
   {projectId: BOOTSTRAP_PROJECT_ID, dataset: BOOTSTRAP_DATASET},

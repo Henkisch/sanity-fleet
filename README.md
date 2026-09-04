@@ -19,6 +19,15 @@ document. Nothing is edited here.
 
 Studios cannot do the last three: a Studio is bound to one project and one dataset.
 
+## Setup
+
+Copy `.env.example` to `.env` and fill in the two ids: the Sanity organization that owns this
+app, and a project to use as the SDK's bootstrap resource (any project you can read works,
+since every query in the app names its own project explicitly). Both are plain identifiers,
+not credentials — they are visible in every deployed Studio's client bundle and in requests
+from the browser. They live in `.env`, which is git-ignored, purely to keep them out of this
+repo's history, not to keep them secret.
+
 ## Running it
 
 ```sh
