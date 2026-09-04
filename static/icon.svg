@@ -1,20 +1,13 @@
 <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!--
-    Drawn in Lucide's language: strokes of one weight, round caps and joins, no
-    fills. A ship reads at a glance where the earlier filled silhouettes turned
-    to mush, and the amber sail is the same attention colour the table uses.
+    A sailboat in two strokes: a hull, and a sail whose left edge is its mast.
+    Monochrome and larger than the previous drawing — the wave, the second
+    sail and the amber accent all read as texture rather than shape once the
+    icon is 22px, and dropping them is what makes it legible.
   -->
-  <rect width="64" height="64" rx="15" fill="url(#fleetBg)"/>
-  <g stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M15 40h34l-5.5 9h-23z"/>
-    <path d="M32 13v27"/>
-    <path d="M12 52c2.2 0 3-2.5 6.5-2.5S24.8 52 27 52s3-2.5 6.5-2.5S39.8 52 42 52s3-2.5 6.5-2.5S52 52 52 52" stroke-opacity="0.75"/>
+  <rect width="64" height="64" rx="15" fill="#5B67F2"/>
+  <g stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M31 10 31 39 50 39 Z"/>
+    <path d="M9 44h46l-8 12H17z"/>
   </g>
-  <path d="M32 18l11 15H32z" stroke="#f9b23b" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
-  <defs>
-    <linearGradient id="fleetBg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#7B87FF"/>
-      <stop offset="1" stop-color="#4E5BE8"/>
-    </linearGradient>
-  </defs>
 </svg>
