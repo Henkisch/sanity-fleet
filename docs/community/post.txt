@@ -1,0 +1,59 @@
+Fleet is a cross-project overview for Sanity. It answers the one question a Studio cannot: across every project in your organization, what needs attention right now?
+
+A Studio is bound to one project and one dataset. Run twenty of them and there is no single place showing the drafts someone left unpublished last month.
+
+What it does
+
+Fleet runs in the Sanity Dashboard, built on the App SDK. Every project in your organization in one sortable table: drafts waiting, stale documents, total documents, last edit. Sort by drafts and the answer is the top row.
+
+Three views a Studio cannot give you:
+
+Drafts across every project. Everything waiting to be published, anywhere, marked as a new draft or an edit to something live.
+
+Stale content across every project. Everything untouched past a threshold you set, from thirty days to a year.
+
+Search across every project. Find a document by title without knowing which project it is in.
+
+Every row links straight into the Studio that owns the document, at that document. Fleet is read-only on purpose: it tells you where to go, then gets out of the way.
+
+Hide the projects you do not want to see. Pin the ones you care about.
+
+Who it is for
+
+Anyone running more than a handful of Sanity projects: agencies with a project per client, teams with a project per brand or market.
+
+Running it yourself
+
+Fleet is open source. Fork it, put your organization ID and any project ID in a .env, run pnpm dev. Deploy with sanity deploy and it appears in your organization's Dashboard sidebar.
+
+One thing to know: each project must allow the app's origin before it answers, so local development needs localhost added to each project's CORS list. Deploying avoids that, since the app is then served from Sanity's own origin. A CORS failure renders a button straight to the right Manage page rather than a mystery.
+
+How it works
+
+There is no federated GROQ across projects, so a cross-project view is one query per project, merged in the browser. Each project fetches inside its own boundary: a slow project delays one row, not the page, and a project you cannot read fails in its own row. No global spinner, because that lets the slowest project decide when anyone sees anything.
+
+What I learned
+
+Verify every number against the Studio before displaying it. More than one plausible data source turned out to be wrong, and a number nobody can check is worse than none.
+
+The Dashboard scopes an app's token to one organization. Open the same build outside the Dashboard and it authenticates differently and sees more, which is an easy way to fool yourself. Test inside the Dashboard.
+
+Sanity UI does not style the page for you. Its theme asks for Inter, but a standalone app must ship the font or everything falls back to the system stack. That is most of the gap between looking like Sanity and almost looking like it.
+
+
+----- FORM FIELDS (not part of the post body) -----
+
+Tagline
+Every Sanity project in your organization, in one sortable table, and one click into the Studio that owns the document.
+
+Frameworks used
+React
+
+Integrations & services used
+None. Fleet talks only to Sanity.
+
+Sanity tools used
+App SDK (@sanity/sdk-react), Sanity Dashboard, Sanity UI, Sanity Icons, GROQ, Sanity CLI
+
+Categories
+Developer tools / DX, Dashboards & internal tools, Content operations, Multi-project workflows
