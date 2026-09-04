@@ -22,5 +22,14 @@ export const PREFERRED_DATASETS = ['production', 'prod', 'main']
 /** Rows fetched per project in the cross-project and detail lists. */
 export const LIST_LIMIT = 25
 
+/**
+ * How far back the activity view looks.
+ *
+ * Sits between "this week" and the 90-day stale default: short enough that the
+ * view means something, long enough that a fleet of mostly-quiet client sites
+ * does not render an empty page most days.
+ */
+export const ACTIVITY_DAYS = 30
+
 /** A project needs attention when it has at least this many drafts waiting. */
 export const DRAFTS_ATTENTION_THRESHOLD = 1

@@ -8,18 +8,31 @@
  *
  * Two filters recur:
  *   CONTENT                     drops everything that is not editorial content:
- *                               assets (`sanity.*`), and the access-control
- *                               documents the Content Lake keeps under the `_.`
- *                               id prefix (`system.group`, `system.role`).
- *                               Verified against live projects — without the
- *                               `_.` exclusion, "last edited" reports
- *                               `_.groups.access-manager` on most projects.
+ *                               the access-control documents the Content Lake
+ *                               keeps under the `_.` id prefix, and every
+ *                               namespaced type. Verified against live projects
+ *                               — without the `_.` exclusion, "last edited"
+ *                               reports `_.groups.access-manager` on most
+ *                               projects.
  *   _id in path("drafts.**")    isolates drafts. Published documents are the
  *                               complement of that set.
  */
 
-/** Documents a human would recognise as content. */
-const CONTENT = `!(_id in path("_.**")) && !(_type match "sanity.*") && !(_type match "system.*")`
+/**
+ * Documents a human would recognise as content.
+ *
+ * A dot in the type name means plumbing. Sanity namespaces its own types
+ * (`sanity.imageAsset`, `sanity.assist.*`, `system.group`), and plugins follow
+ * the convention — `mux.videoAsset`, `translation.metadata`, `preview.secret`
+ * are all bookkeeping a plugin owns rather than anything anyone authored.
+ * Schema types written by hand are camelCase and undotted.
+ *
+ * Naming the namespaces individually only excluded the plugins already
+ * installed when this was written; the rule generalises to the ones a fork has
+ * and this repo does not. The cost is a schema that puts a dot in a type name
+ * of its own, which the convention says not to do.
+ */
+const CONTENT = `!(_id in path("_.**")) && length(string::split(_type, ".")) == 1`
 
 /**
  * Fields worth showing in a list row, across schemas Fleet knows nothing about.
@@ -66,6 +79,20 @@ export const STALE_QUERY = `*[
   !(_id in path("drafts.**")) &&
   _updatedAt < $staleBefore
 ] | order(_updatedAt asc)[0...$limit]${ROW_PROJECTION}`
+
+/**
+ * Recently touched documents inside the activity window, drafts included.
+ *
+ * Windowed where the project detail view's list is not: at fleet scope an
+ * unbounded "most recent 25" renders a section for every project that has ever
+ * held content, including ones last edited years ago, which is a roll call
+ * rather than a report. With the window, a project nobody has touched lately
+ * drops out on its own.
+ */
+export const ACTIVITY_QUERY = `*[
+  ${CONTENT} &&
+  _updatedAt > $activeSince
+] | order(_updatedAt desc)[0...$limit]${ROW_PROJECTION}`
 
 /** Recently touched documents, drafts included. Powers the project detail view. */
 export const RECENT_QUERY = `*[

@@ -17,7 +17,7 @@ jump into the Studio that owns the document.
 | `#/p/<projectId>` | One project: dataset picker, recent activity, a link into its Studio |
 | `#/drafts` | Drafts waiting to be published, in the current scope |
 | `#/stale` | Documents untouched past the stale threshold, in the current scope |
-| `#/activity` | Recently edited documents, drafts included, in the current scope |
+| `#/activity` | Documents edited in the last 30 days, drafts included, in the current scope |
 | `#/search?q=…` | Documents by title, across every project at once |
 
 The last four are what a single Studio structurally cannot do.
@@ -141,9 +141,12 @@ No test runner. Verification is those three plus using the app.
 
 ## Gotchas
 
-- **Filter system documents by id, not only by type.** Excluding `sanity.*` is not enough: the
-  Content Lake keeps access-control documents under an `_.` id prefix, and they otherwise
-  dominate "last edited".
+- **Plumbing hides in two places, and neither is `sanity.*`.** The Content Lake keeps
+  access-control documents under an `_.` **id** prefix, and plugins namespace their bookkeeping
+  with a dot in the **type** — `mux.videoAsset`, `translation.metadata`, `preview.secret`.
+  Both otherwise dominate "most recently edited". Fleet drops the `_.` ids and every dotted
+  type (`queries.ts`), on the convention that hand-written schema types are camelCase and
+  undotted.
 - **Never derive a GROQ parameter from `Date.now()` per render.** The SDK keys its query cache
   on query + parameters, so a fresh timestamp each render is a fresh key, a suspend and a
   re-render — an infinite loop. Fleet floors its stale cutoff to the UTC day.
@@ -167,7 +170,12 @@ No test runner. Verification is those three plus using the app.
   `slug.current`). It is not Sanity's search: no relevance ranking, no full text. A document
   titled through some other field will not appear.
 - Projects that are disabled or blocked are filtered out — they return `402` on every query.
-- The stale threshold is a per-viewer preference in `localStorage`, not shared.
+- The stale threshold is a per-viewer preference in `localStorage`, not shared. The activity
+  window is a constant (`ACTIVITY_DAYS`, 30 days).
+- Dropping every dotted type also drops a schema that puts a dot in a type name of its own.
+  That is against Sanity's convention, but it is a real cost of the rule.
+- Machine-generated content with an undotted type — a plugin writing `linkCheckerReport`
+  documents, say — still counts as content and can dominate the activity view.
 
 ## License
 
