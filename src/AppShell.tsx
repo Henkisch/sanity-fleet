@@ -16,7 +16,7 @@ import { useOrganizations, useProjects } from "@sanity/sdk-react";
 import { Box, Button, Card, Flex, Stack, Text, TextInput } from "@sanity/ui";
 import { Suspense, useEffect, useMemo, useState, type JSX } from "react";
 import { ContentArea } from "./ContentArea";
-import { SignalsProvider, useSignals } from "./fleet/SignalsStore";
+import { SignalsProvider } from "./fleet/SignalsStore";
 import { usePrefs } from "./lib/PrefsContext";
 import { hiddenProjects, visibleProjects } from "./lib/projects";
 import { useIsMobile } from "./lib/useViewport";
@@ -212,7 +212,6 @@ function SidebarData({
   const { prefs, update, setHidden, toggleOrg } = usePrefs();
   const { data: projects } = useProjects();
   const { data: organizations } = useOrganizations();
-  const signals = useSignals();
 
   const groups = useMemo(() => {
     const visible = visibleProjects(projects, prefs);
@@ -232,17 +231,6 @@ function SidebarData({
     [projects, prefs],
   );
 
-  // Loading and error entries both read as "no count yet" — the rail must
-  // not render "0" for a project whose query has not answered.
-  const draftCounts = useMemo(() => {
-    const counts: Record<string, number | null> = {};
-    for (const [projectId, entry] of Object.entries(signals)) {
-      counts[projectId] =
-        entry.status === "ready" ? entry.signals.drafts : null;
-    }
-    return counts;
-  }, [signals]);
-
   return (
     <Sidebar
       organizations={groups}
@@ -254,7 +242,6 @@ function SidebarData({
       onSetHidden={setHidden}
       route={route}
       navigate={navigate}
-      draftCounts={draftCounts}
     />
   );
 }

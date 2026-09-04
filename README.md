@@ -197,3 +197,7 @@ There is no test runner. Verification is the three commands above plus using the
   A document titled through some other field will not appear.
 - Projects that are disabled or blocked are filtered out — they return `402` on every query.
 - The stale threshold is a per-viewer preference stored in `localStorage`, not shared.
+
+## License
+
+[MIT](LICENSE). Fork it, deploy it to your own organization, change what you like.

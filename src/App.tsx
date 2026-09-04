@@ -21,6 +21,14 @@ import {AppShell} from './AppShell'
 import {bootstrapConfig} from './config'
 import {PrefsProvider} from './lib/PrefsContext'
 
+/*
+ * `sanity build` drops `app.title` from the generated index.html — its Vite
+ * plugin renders the document without a title, so the bundle ships the CLI's
+ * "Sanity App" fallback while `sanity dev` renders "Fleet" correctly. The
+ * Dashboard titles the browser tab from this document, so set it here.
+ */
+document.title = 'Fleet'
+
 const theme = buildTheme()
 
 function Loading(): JSX.Element {

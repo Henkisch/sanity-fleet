@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "main": "package.json",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "build": "sanity build",
     "deploy": "sanity deploy",
