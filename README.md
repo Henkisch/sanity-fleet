@@ -63,6 +63,7 @@ Copy `.env.example` to `.env` and fill in two values:
 | `SANITY_APP_ORGANIZATION_ID` | yes | The organization that owns this app. Read by `sanity.cli.ts` at dev/build/deploy time. Find it in the Manage URL: `sanity.io/manage/organization/<this>` |
 | `SANITY_APP_BOOTSTRAP_PROJECT_ID` | yes | Any project you can read. The SDK needs a default resource; Fleet names its own project on every query, so this one is not displayed specially |
 | `SANITY_APP_BOOTSTRAP_DATASET` | no | Defaults to `production` |
+| `SANITY_APP_DEPLOYMENT_ID` | no | The deployed app to update. Leave empty on a fresh fork — the first `sanity deploy` creates one and prints the id to paste here. Without it, every deploy asks whether to create or reuse |
 
 Two things worth being precise about:
 

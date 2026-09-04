@@ -7,6 +7,13 @@ import {defineCliConfig} from 'sanity/cli'
  */
 const organizationId = process.env.SANITY_APP_ORGANIZATION_ID
 
+/*
+ * The deployment this repo pushes to. Kept out of the file for the same reason
+ * as the organization id, and for one more: a fork must deploy to its OWN app.
+ * Leave it unset and `sanity deploy` creates one, then prints the id to store.
+ */
+const appId = process.env.SANITY_APP_DEPLOYMENT_ID
+
 if (!organizationId) {
   // Not thrown: `sanity build` should still run for someone who has just
   // cloned. Deploy is the command that genuinely needs it.
@@ -20,4 +27,5 @@ export default defineCliConfig({
     title: 'Fleet',
     icon: './static/icon.svg',
   },
+  deployment: {appId},
 })
