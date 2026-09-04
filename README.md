@@ -8,6 +8,8 @@ A Studio is bound to one project and one dataset. Run twenty of them and nothing
 drafts you left unpublished last month. Fleet is read-only by design: overview, narrow down,
 jump into the Studio that owns the document.
 
+![Every project in one sortable table, ordered by drafts waiting](.github/screenshots/overview.jpg)
+
 ## Views
 
 | Route | Shows |
@@ -21,6 +23,17 @@ jump into the Studio that owns the document.
 | `#/search?q=…` | Documents by title, across every project at once |
 
 The last four are what a single Studio structurally cannot do.
+
+Drafts, grouped by project, separating a new draft from an edit to something already live:
+
+![Drafts waiting to be published, grouped by project](.github/screenshots/drafts.jpg)
+
+Activity, ordered by which project was touched most recently. A project with nothing inside the
+window is absent rather than empty:
+
+![Documents edited in the last 30 days, grouped by project](.github/screenshots/activity.jpg)
+
+Screenshots use example project names and document titles; everything else is a real run.
 
 ## Getting started
 
