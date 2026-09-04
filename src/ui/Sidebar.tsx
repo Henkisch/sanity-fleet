@@ -9,34 +9,34 @@
  * an overview app should open on the overview, not on its own index. Fold state
  * persists, so the projects someone works in daily stay one click away.
  */
-import {ChevronDownIcon} from '@sanity/icons/ChevronDown'
-import {ChevronRightIcon} from '@sanity/icons/ChevronRight'
-import {EyeClosedIcon} from '@sanity/icons/EyeClosed'
-import {EyeOpenIcon} from '@sanity/icons/EyeOpen'
-import {ThLargeIcon} from '@sanity/icons/ThLarge'
-import {Box, Card, Flex, Stack, Text} from '@sanity/ui'
-import type {JSX, ReactNode} from 'react'
-import type {QueryableProject} from '../lib/projects'
-import type {Route} from '../routes'
+import { ChevronDownIcon } from "@sanity/icons/ChevronDown";
+import { ChevronRightIcon } from "@sanity/icons/ChevronRight";
+import { EyeClosedIcon } from "@sanity/icons/EyeClosed";
+import { EyeOpenIcon } from "@sanity/icons/EyeOpen";
+import { ThLargeIcon } from "@sanity/icons/ThLarge";
+import { Box, Card, Flex, Stack, Text } from "@sanity/ui";
+import type { JSX, ReactNode } from "react";
+import type { QueryableProject } from "../lib/projects";
+import type { Route } from "../routes";
 
 interface OrgGroup {
-  id: string
-  name: string
-  projects: QueryableProject[]
+  id: string;
+  name: string;
+  projects: QueryableProject[];
 }
 
 interface SidebarProps {
-  organizations: OrgGroup[]
-  hidden: QueryableProject[]
-  expandedOrgs: string[]
-  showHidden: boolean
-  onToggleOrg: (organizationId: string) => void
-  onToggleShowHidden: (show: boolean) => void
-  onSetHidden: (projectId: string, hidden: boolean) => void
-  route: Route
-  navigate: (route: Route) => void
+  organizations: OrgGroup[];
+  hidden: QueryableProject[];
+  expandedOrgs: string[];
+  showHidden: boolean;
+  onToggleOrg: (organizationId: string) => void;
+  onToggleShowHidden: (show: boolean) => void;
+  onSetHidden: (projectId: string, hidden: boolean) => void;
+  route: Route;
+  navigate: (route: Route) => void;
   /** Draft count per project, null while its signals query has not answered. */
-  draftCounts: Record<string, number | null>
+  draftCounts: Record<string, number | null>;
 }
 
 export function Sidebar({
@@ -51,60 +51,106 @@ export function Sidebar({
   navigate,
   draftCounts,
 }: SidebarProps): JSX.Element {
-  const activeProjectId = route.scope.kind === 'project' ? route.scope.id : null
-  const activeOrgId = route.scope.kind === 'organization' ? route.scope.id : null
+  const activeProjectId =
+    route.scope.kind === "project" ? route.scope.id : null;
+  const activeOrgId =
+    route.scope.kind === "organization" ? route.scope.id : null;
+
+  /*
+   * With one organization, its row and "All projects" list the same projects
+   * and carry the same count — a fold to nowhere. Its projects are listed flat
+   * instead. The grouped path below stays for the multi-organization case: the
+   * Dashboard scopes an app's token to one organization, so a second one
+   * appears only when the app is deployed there too.
+   */
+  const soleOrg = organizations.length === 1 ? organizations[0] : null;
 
   return (
     <nav aria-label="Projects">
       <Stack gap={4} paddingY={3} paddingX={2}>
-        <NavItem
-          icon={<ThLargeIcon />}
-          label="All projects"
-          selected={route.scope.kind === 'all'}
-          onClick={() => navigate({scope: {kind: 'all'}, view: route.view})}
-        />
+        <Stack gap={1}>
+          <NavItem
+            icon={<ThLargeIcon />}
+            label="All projects"
+            selected={route.scope.kind === "all"}
+            onClick={() =>
+              navigate({ scope: { kind: "all" }, view: route.view })
+            }
+          />
 
-        {organizations.map((org) => {
-          const expanded = expandedOrgs.includes(org.id)
+          {soleOrg?.projects.map((project) => (
+            <NavItem
+              key={project.id}
+              label={project.displayName}
+              indented
+              selected={activeProjectId === project.id}
+              badge={draftBadge(draftCounts[project.id])}
+              badgeLabel={draftBadgeLabel(draftCounts[project.id])}
+              onClick={() =>
+                navigate({
+                  scope: { kind: "project", id: project.id },
+                  view: route.view,
+                })
+              }
+              action={{
+                icon: <EyeClosedIcon />,
+                title: `Hide ${project.displayName}`,
+                onClick: () => onSetHidden(project.id, true),
+              }}
+            />
+          ))}
+        </Stack>
 
-          return (
-            <Stack key={org.id} gap={1}>
-              <NavItem
-                icon={expanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
-                label={org.name}
-                badge={String(org.projects.length)}
-                selected={activeOrgId === org.id}
-                onIconClick={() => onToggleOrg(org.id)}
-                iconLabel={expanded ? `Collapse ${org.name}` : `Expand ${org.name}`}
-                expanded={expanded}
-                onClick={() => {
-                  if (!expanded) onToggleOrg(org.id)
-                  navigate({scope: {kind: 'organization', id: org.id}, view: route.view})
-                }}
-              />
+        {!soleOrg &&
+          organizations.map((org) => {
+            const expanded = expandedOrgs.includes(org.id);
 
-              {expanded &&
-                org.projects.map((project) => (
-                  <NavItem
-                    key={project.id}
-                    label={project.displayName}
-                    indented
-                    selected={activeProjectId === project.id}
-                    badge={draftBadge(draftCounts[project.id])}
-                    badgeLabel={draftBadgeLabel(draftCounts[project.id])}
-                    onClick={() =>
-                      navigate({scope: {kind: 'project', id: project.id}, view: route.view})
-                    }
-                    action={{
-                      icon: <EyeClosedIcon />,
-                      title: `Hide ${project.displayName}`,
-                      onClick: () => onSetHidden(project.id, true),
-                    }}
-                  />
-                ))}
-            </Stack>
-          )
-        })}
+            return (
+              <Stack key={org.id} gap={1}>
+                <NavItem
+                  icon={expanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
+                  label={org.name}
+                  badge={String(org.projects.length)}
+                  selected={activeOrgId === org.id}
+                  onIconClick={() => onToggleOrg(org.id)}
+                  iconLabel={
+                    expanded ? `Collapse ${org.name}` : `Expand ${org.name}`
+                  }
+                  expanded={expanded}
+                  onClick={() => {
+                    if (!expanded) onToggleOrg(org.id);
+                    navigate({
+                      scope: { kind: "organization", id: org.id },
+                      view: route.view,
+                    });
+                  }}
+                />
+
+                {expanded &&
+                  org.projects.map((project) => (
+                    <NavItem
+                      key={project.id}
+                      label={project.displayName}
+                      indented
+                      selected={activeProjectId === project.id}
+                      badge={draftBadge(draftCounts[project.id])}
+                      badgeLabel={draftBadgeLabel(draftCounts[project.id])}
+                      onClick={() =>
+                        navigate({
+                          scope: { kind: "project", id: project.id },
+                          view: route.view,
+                        })
+                      }
+                      action={{
+                        icon: <EyeClosedIcon />,
+                        title: `Hide ${project.displayName}`,
+                        onClick: () => onSetHidden(project.id, true),
+                      }}
+                    />
+                  ))}
+              </Stack>
+            );
+          })}
 
         {hidden.length > 0 && (
           <Stack gap={1}>
@@ -115,7 +161,9 @@ export function Sidebar({
               muted
               selected={false}
               expanded={showHidden}
-              iconLabel={showHidden ? 'Hide hidden projects' : 'Show hidden projects'}
+              iconLabel={
+                showHidden ? "Hide hidden projects" : "Show hidden projects"
+              }
               onClick={() => onToggleShowHidden(!showHidden)}
             />
             {showHidden &&
@@ -129,7 +177,10 @@ export function Sidebar({
                   badge={draftBadge(draftCounts[project.id])}
                   badgeLabel={draftBadgeLabel(draftCounts[project.id])}
                   onClick={() =>
-                    navigate({scope: {kind: 'project', id: project.id}, view: route.view})
+                    navigate({
+                      scope: { kind: "project", id: project.id },
+                      view: route.view,
+                    })
                   }
                   action={{
                     icon: <EyeOpenIcon />,
@@ -142,7 +193,7 @@ export function Sidebar({
         )}
       </Stack>
     </nav>
-  )
+  );
 }
 
 /**
@@ -151,18 +202,18 @@ export function Sidebar({
  * none.
  */
 function draftBadge(count: number | null | undefined): string | undefined {
-  return count ? String(count) : undefined
+  return count ? String(count) : undefined;
 }
 
 /** Accessible name for the draft-count badge, so it does not read as a bare number. */
 function draftBadgeLabel(count: number | null | undefined): string | undefined {
-  return count ? `${count} drafts waiting` : undefined
+  return count ? `${count} drafts waiting` : undefined;
 }
 
 interface NavAction {
-  icon: ReactNode
-  title: string
-  onClick: () => void
+  icon: ReactNode;
+  title: string;
+  onClick: () => void;
 }
 
 function NavItem({
@@ -179,56 +230,58 @@ function NavItem({
   expanded,
   action,
 }: {
-  icon?: ReactNode
-  label: string
-  badge?: string
+  icon?: ReactNode;
+  label: string;
+  badge?: string;
   /** Accessible name for the badge, when it is more than decoration. */
-  badgeLabel?: string
-  selected: boolean
-  muted?: boolean
-  indented?: boolean
-  onClick: () => void
+  badgeLabel?: string;
+  selected: boolean;
+  muted?: boolean;
+  indented?: boolean;
+  onClick: () => void;
   /** When set, the icon toggles instead of navigating (fold without moving). */
-  onIconClick?: () => void
+  onIconClick?: () => void;
   /** Accessible name for the icon button, when it toggles instead of navigating. */
-  iconLabel?: string
+  iconLabel?: string;
   /** Disclosure state of whatever this row controls, if it controls one. */
-  expanded?: boolean
-  action?: NavAction
+  expanded?: boolean;
+  action?: NavAction;
 }) {
   return (
     <Card
       padding={0}
       radius={2}
-      tone={selected ? 'primary' : 'default'}
+      tone={selected ? "primary" : "default"}
       selected={selected}
       className="nav-item"
-      style={{background: selected ? undefined : 'transparent'}}
+      style={{ background: selected ? undefined : "transparent" }}
     >
       <Flex align="center">
         {icon && (
           <Box
-            as={onIconClick ? 'button' : 'div'}
+            as={onIconClick ? "button" : "div"}
             onClick={
               onIconClick
                 ? (event: React.MouseEvent) => {
-                    event.stopPropagation()
-                    onIconClick()
+                    event.stopPropagation();
+                    onIconClick();
                   }
                 : undefined
             }
             aria-label={onIconClick ? iconLabel : undefined}
-            aria-expanded={onIconClick && expanded !== undefined ? expanded : undefined}
+            aria-expanded={
+              onIconClick && expanded !== undefined ? expanded : undefined
+            }
             paddingLeft={2}
             paddingRight={1}
             paddingY={2}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              background: 'transparent',
+              display: "flex",
+              alignItems: "center",
+              background: "transparent",
               border: 0,
-              color: 'inherit',
-              cursor: onIconClick ? 'pointer' : 'inherit',
+              color: "inherit",
+              cursor: onIconClick ? "pointer" : "inherit",
               lineHeight: 0,
             }}
           >
@@ -246,25 +299,27 @@ function NavItem({
           as="button"
           flex={1}
           onClick={onClick}
-          aria-current={selected ? 'page' : undefined}
-          aria-expanded={!onIconClick && expanded !== undefined ? expanded : undefined}
+          aria-current={selected ? "page" : undefined}
+          aria-expanded={
+            !onIconClick && expanded !== undefined ? expanded : undefined
+          }
           paddingY={2}
           paddingLeft={icon ? 1 : indented ? 5 : 3}
           paddingRight={action ? 1 : 2}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            background: 'transparent',
+            display: "flex",
+            alignItems: "center",
+            background: "transparent",
             border: 0,
-            cursor: 'pointer',
-            textAlign: 'left',
+            cursor: "pointer",
+            textAlign: "left",
             minWidth: 0,
-            font: 'inherit',
-            color: 'inherit',
+            font: "inherit",
+            color: "inherit",
           }}
         >
           <Flex align="center" gap={2}>
-            <Box flex={1} style={{minWidth: 0}}>
+            <Box flex={1} style={{ minWidth: 0 }}>
               <Text
                 size={1}
                 muted={muted && !selected}
@@ -292,12 +347,12 @@ function NavItem({
             paddingX={2}
             paddingY={2}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              background: 'transparent',
+              display: "flex",
+              alignItems: "center",
+              background: "transparent",
               border: 0,
-              cursor: 'pointer',
-              color: 'inherit',
+              cursor: "pointer",
+              color: "inherit",
               lineHeight: 0,
             }}
           >
@@ -308,5 +363,5 @@ function NavItem({
         )}
       </Flex>
     </Card>
-  )
+  );
 }
