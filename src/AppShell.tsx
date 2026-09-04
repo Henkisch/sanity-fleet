@@ -25,7 +25,7 @@ import {CardSkeleton, ErrorCard, SkeletonLine} from './ui/primitives'
 import {FleetMark} from './ui/FleetMark'
 import {Sidebar} from './ui/Sidebar'
 
-const SIDEBAR_WIDTH = 236
+const SIDEBAR_WIDTH = 280
 
 export function AppShell(): JSX.Element {
   const {route, navigate} = useRoute()
@@ -180,10 +180,10 @@ function Header({
   const [searchOpen, setSearchOpen] = useState(false)
 
   // Left inset matches the rail's own, so the mark lines up with the items
-  // below it; right inset matches the content's, so the search field lands on
-  // the same edge as the table beneath it.
+  // below it; right inset matches ContentArea's paddingX, so the search field
+  // lands on the same edge as the table beneath it.
   return (
-    <Card borderBottom paddingLeft={2} paddingRight={4} paddingY={2} style={{flex: 'none'}}>
+    <Card borderBottom paddingLeft={2} paddingRight={3} paddingY={2} style={{flex: 'none'}}>
       <Flex align="center" gap={2}>
         {isMobile && (
           <Button
