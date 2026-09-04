@@ -28,7 +28,7 @@ export function AppShell(): JSX.Element {
   const { route, navigate } = useRoute();
 
   return (
-    <Container width={5} paddingX={0} paddingY={0}>
+    <Container width={6} padding={4} style={{maxWidth: '100%'}}>
       <Stack gap={5}>
         <Header route={route} navigate={navigate} />
         <ErrorBoundary

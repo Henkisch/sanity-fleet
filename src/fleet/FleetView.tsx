@@ -8,6 +8,7 @@ import {useOrganizations, useProjects} from '@sanity/sdk-react'
 import {Box, Button, Card, Checkbox, Flex, Grid, Inline, Select, Stack, Text} from '@sanity/ui'
 import {useMemo, type JSX} from 'react'
 import {usePrefs} from '../lib/PrefsContext'
+import {visibleProjects} from '../lib/projects'
 import {ProjectCard, type FleetProject} from './ProjectCard'
 
 interface FleetViewProps {
@@ -24,25 +25,13 @@ export function FleetView({onOpenProject}: FleetViewProps): JSX.Element {
     return (id: string) => byId.get(id) ?? 'Unknown organization'
   }, [organizations])
 
-  const visible = useMemo(() => {
-    return projects
-      .filter((project) => !project.isDisabled && !project.isBlocked)
-      .filter(
-        (project) =>
-          prefs.visibleProjects.length === 0 || prefs.visibleProjects.includes(project.id),
-      )
-      .sort((a, b) => a.displayName.localeCompare(b.displayName, 'sv'))
-  }, [projects, prefs.visibleProjects])
+  const visible = useMemo(() => visibleProjects(projects, prefs), [projects, prefs])
 
   const grouped = useMemo(() => {
     const groups = new Map<string, FleetProject[]>()
     for (const project of visible) {
       const list = groups.get(project.organizationId) ?? []
-      list.push({
-        id: project.id,
-        displayName: project.displayName,
-        organizationId: project.organizationId,
-      })
+      list.push(project)
       groups.set(project.organizationId, list)
     }
     return [...groups.entries()].sort(([a], [b]) => orgName(a).localeCompare(orgName(b), 'sv'))

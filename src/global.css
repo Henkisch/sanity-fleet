@@ -1,0 +1,27 @@
+/*
+ * The App SDK's generated index.html ships no reset, so the browser's default
+ * 8px body margin shows as a pale frame around the app. Sanity UI styles its
+ * own components but never touches the document element.
+ */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  /* Matches the Card that wraps the app, so the frame cannot flash light
+     before React paints or peek out past the app's own background. */
+  background: var(--card-bg-color, #13141b);
+  overscroll-behavior: none;
+}
+
+/*
+ * Nothing in this app is meant to scroll sideways: the grid reflows instead.
+ * A stray wide child would otherwise shift the whole page.
+ */
+#root {
+  overflow-x: hidden;
+}

@@ -114,7 +114,7 @@ function CardFrame({onClick, children}: {onClick: () => void; children: ReactNod
       padding={4}
       radius={3}
       shadow={1}
-      style={{textAlign: 'left', width: '100%', height: '100%', cursor: 'pointer'}}
+      style={{textAlign: 'left', width: '100%', height: '100%', cursor: 'pointer', minWidth: 0}}
     >
       <Stack gap={3}>{children}</Stack>
     </Card>
@@ -134,7 +134,7 @@ function Header({
 }) {
   return (
     <Flex align="center" gap={3}>
-      <Box flex={1}>
+      <Box flex={1} style={{minWidth: 0}}>
         <Stack gap={2}>
           <Text size={1} weight="semibold" textOverflow="ellipsis">
             {project.displayName}

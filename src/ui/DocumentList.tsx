@@ -49,7 +49,7 @@ export function DocumentList({
         return (
           <Card key={row._id} padding={3} radius={2} tone="transparent">
             <Flex align="center" gap={3}>
-              <Box flex={1}>
+              <Box flex={1} style={{minWidth: 0}}>
                 <Stack gap={2}>
                   <Text size={1} textOverflow="ellipsis">
                     {row.title}

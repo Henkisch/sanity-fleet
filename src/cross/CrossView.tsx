@@ -13,6 +13,7 @@ import {Suspense, useMemo, type JSX} from 'react'
 import {LIST_LIMIT} from '../config'
 import {assumedDataset} from '../lib/datasets'
 import {usePrefs} from '../lib/PrefsContext'
+import {visibleProjects} from '../lib/projects'
 import {staleBefore} from '../lib/format'
 import {DRAFTS_QUERY, SEARCH_QUERY, STALE_QUERY, type DocumentRow} from '../lib/queries'
 import {DocumentList} from '../ui/DocumentList'
@@ -37,17 +38,7 @@ export function CrossView({mode, query = ''}: CrossViewProps): JSX.Element {
   const {prefs} = usePrefs()
   const {data: projects} = useProjects()
 
-  const visible = useMemo(
-    () =>
-      projects
-        .filter((project) => !project.isDisabled && !project.isBlocked)
-        .filter(
-          (project) =>
-            prefs.visibleProjects.length === 0 || prefs.visibleProjects.includes(project.id),
-        )
-        .sort((a, b) => a.displayName.localeCompare(b.displayName, 'sv')),
-    [projects, prefs.visibleProjects],
-  )
+  const visible = useMemo(() => visibleProjects(projects, prefs), [projects, prefs])
 
   if (mode === 'search' && query.trim().length < 2) {
     return (

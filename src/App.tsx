@@ -1,6 +1,8 @@
 import {SanityApp} from '@sanity/sdk-react'
 import {Card, Flex, Spinner, ThemeProvider, usePrefersDark} from '@sanity/ui'
 import {buildTheme} from '@sanity/ui/theme'
+import '@sanity/ui/styles.css'
+import './global.css'
 import type {JSX} from 'react'
 import {AppShell} from './AppShell'
 import {bootstrapConfig} from './config'
