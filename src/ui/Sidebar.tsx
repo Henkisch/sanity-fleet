@@ -35,6 +35,8 @@ interface SidebarProps {
   onSetHidden: (projectId: string, hidden: boolean) => void
   route: Route
   navigate: (route: Route) => void
+  /** Draft count per project, null while its signals query has not answered. */
+  draftCounts: Record<string, number | null>
 }
 
 export function Sidebar({
@@ -47,6 +49,7 @@ export function Sidebar({
   onSetHidden,
   route,
   navigate,
+  draftCounts,
 }: SidebarProps): JSX.Element {
   const activeProjectId = route.scope.kind === 'project' ? route.scope.id : null
   const activeOrgId = route.scope.kind === 'organization' ? route.scope.id : null
@@ -87,6 +90,8 @@ export function Sidebar({
                     label={project.displayName}
                     indented
                     selected={activeProjectId === project.id}
+                    badge={draftBadge(draftCounts[project.id])}
+                    badgeLabel={draftBadgeLabel(draftCounts[project.id])}
                     onClick={() =>
                       navigate({scope: {kind: 'project', id: project.id}, view: route.view})
                     }
@@ -121,6 +126,8 @@ export function Sidebar({
                   indented
                   muted
                   selected={activeProjectId === project.id}
+                  badge={draftBadge(draftCounts[project.id])}
+                  badgeLabel={draftBadgeLabel(draftCounts[project.id])}
                   onClick={() =>
                     navigate({scope: {kind: 'project', id: project.id}, view: route.view})
                   }
@@ -138,6 +145,20 @@ export function Sidebar({
   )
 }
 
+/**
+ * Deliberately: no badge at zero, and no badge while loading or on error. A
+ * rail that flickers counts on every navigation is worse than one that shows
+ * none.
+ */
+function draftBadge(count: number | null | undefined): string | undefined {
+  return count ? String(count) : undefined
+}
+
+/** Accessible name for the draft-count badge, so it does not read as a bare number. */
+function draftBadgeLabel(count: number | null | undefined): string | undefined {
+  return count ? `${count} drafts waiting` : undefined
+}
+
 interface NavAction {
   icon: ReactNode
   title: string
@@ -148,6 +169,7 @@ function NavItem({
   icon,
   label,
   badge,
+  badgeLabel,
   selected,
   muted,
   indented,
@@ -160,6 +182,8 @@ function NavItem({
   icon?: ReactNode
   label: string
   badge?: string
+  /** Accessible name for the badge, when it is more than decoration. */
+  badgeLabel?: string
   selected: boolean
   muted?: boolean
   indented?: boolean
@@ -251,7 +275,7 @@ function NavItem({
               </Text>
             </Box>
             {badge && (
-              <Text size={1} muted>
+              <Text size={1} muted title={badgeLabel}>
                 {badge}
               </Text>
             )}
