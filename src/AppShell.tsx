@@ -225,10 +225,18 @@ function Header({
           </>
         ) : (
           <>
-            <Box flex={1} style={{maxWidth: 420, minWidth: 0}}>
-              <SearchForm term={term} setTerm={setTerm} navigate={navigate} placeholder="Find documents…" />
-            </Box>
+            {/* Search sits at the far end of the header, opposite the
+                identity: it acts on everything, so it belongs to the app bar
+                rather than to the column it happened to sit above. */}
             <Box flex={1} />
+            <Box style={{width: 300, flex: 'none'}}>
+              <SearchForm
+                term={term}
+                setTerm={setTerm}
+                navigate={navigate}
+                placeholder="Find documents…"
+              />
+            </Box>
           </>
         )}
       </Flex>
