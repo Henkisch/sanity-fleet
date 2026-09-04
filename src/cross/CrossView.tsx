@@ -1,5 +1,5 @@
 /**
- * Cross-project views: drafts, stale documents, and search.
+ * Cross-project views: drafts, stale documents, recent activity, and search.
  *
  * These are the screens a Studio cannot produce — one query per project, fanned
  * out and rendered per project. Results are grouped by project rather than
@@ -15,18 +15,36 @@ import {assumedDataset} from '../lib/datasets'
 import {usePrefs} from '../lib/PrefsContext'
 import type {QueryableProject} from '../lib/projects'
 import {staleBefore} from '../lib/format'
-import {DRAFTS_QUERY, SEARCH_QUERY, STALE_QUERY, type DocumentRow} from '../lib/queries'
+import {
+  DRAFTS_QUERY,
+  RECENT_QUERY,
+  SEARCH_QUERY,
+  STALE_QUERY,
+  type DocumentRow,
+} from '../lib/queries'
 import {DocumentList} from '../ui/DocumentList'
 import {ErrorBoundary} from '../ui/ErrorBoundary'
 import {CardSkeleton, InlineUnavailable} from '../ui/primitives'
 
-export type CrossMode = 'drafts' | 'stale' | 'search'
+export type CrossMode = 'drafts' | 'stale' | 'search' | 'activity'
+
+/*
+ * Drafts is what is waiting and stale is what was forgotten; activity is the
+ * third state those two imply but neither shows — what is actually moving.
+ * It reuses the query behind the project detail view, at fleet scope.
+ */
+const QUERIES: Record<CrossMode, string> = {
+  activity: RECENT_QUERY,
+  drafts: DRAFTS_QUERY,
+  search: SEARCH_QUERY,
+  stale: STALE_QUERY,
+}
 
 interface CrossViewProps {
   mode: CrossMode
   /** The projects to fan out across — already scoped by the caller. */
   projects: QueryableProject[]
-  /** Search term; ignored by the drafts and stale modes. */
+  /** Search term; ignored by every mode but search. */
   query?: string
 }
 
@@ -77,7 +95,7 @@ function ProjectRows({
   const dataset = assumedDataset(projectId, prefs)
 
   const {data: rows} = useQuery<DocumentRow[]>({
-    query: mode === 'drafts' ? DRAFTS_QUERY : mode === 'stale' ? STALE_QUERY : SEARCH_QUERY,
+    query: QUERIES[mode],
     params: {
       limit: LIST_LIMIT,
       staleBefore: staleBefore(prefs.staleDays),

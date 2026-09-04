@@ -1,9 +1,9 @@
 /**
  * The content area: a scope header with its view tabs, and the view below.
  *
- * Overview / Drafts / Stale are lenses on the current scope, not places, so
- * they live here next to the thing they describe. Switching scope in the rail
- * keeps the lens; switching lens keeps the scope.
+ * Overview / Drafts / Stale / Activity are lenses on the current scope, not
+ * places, so they live here next to the thing they describe. Switching scope in
+ * the rail keeps the lens; switching lens keeps the scope.
  */
 import {useOrganizations, useProject, useProjects} from '@sanity/sdk-react'
 import {Box, Flex, Heading, Stack, Tab, TabList, Text} from '@sanity/ui'
@@ -21,6 +21,7 @@ const VIEWS: {id: View; label: string}[] = [
   {id: 'overview', label: 'Overview'},
   {id: 'drafts', label: 'Drafts'},
   {id: 'stale', label: 'Stale'},
+  {id: 'activity', label: 'Activity'},
 ]
 
 interface ContentAreaProps {

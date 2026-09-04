@@ -17,9 +17,10 @@ jump into the Studio that owns the document.
 | `#/p/<projectId>` | One project: dataset picker, recent activity, a link into its Studio |
 | `#/drafts` | Drafts waiting to be published, in the current scope |
 | `#/stale` | Documents untouched past the stale threshold, in the current scope |
+| `#/activity` | Recently edited documents, drafts included, in the current scope |
 | `#/search?q=…` | Documents by title, across every project at once |
 
-The last three are what a single Studio structurally cannot do.
+The last four are what a single Studio structurally cannot do.
 
 ## Getting started
 

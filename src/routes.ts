@@ -3,13 +3,14 @@
  *
  * A route is two independent choices: **what** you are looking at (a scope —
  * everything, one organization, one project) and **which view** of it
- * (overview, drafts, stale). Keeping them separate is what lets "drafts" mean
- * "drafts in the selected organization" when an organization is selected,
+ * (overview, drafts, stale, activity). Keeping them separate is what lets
+ * "drafts" mean "drafts in the selected organization" when one is selected,
  * rather than a permanently global list — the reason those views do not
  * belong in the navigation rail.
  *
  *   #/                         overview, everything
  *   #/drafts                   drafts, everything
+ *   #/activity                 recent edits, everything
  *   #/o/<orgId>[/drafts]       one organization
  *   #/p/<projectId>[/stale]    one project
  *   #/search?q=<query>         search, everything
@@ -25,7 +26,7 @@ export type Scope =
   | {kind: 'organization'; id: string}
   | {kind: 'project'; id: string}
 
-export type View = 'overview' | 'drafts' | 'stale'
+export type View = 'overview' | 'drafts' | 'stale' | 'activity'
 
 export interface Route {
   scope: Scope
@@ -34,7 +35,7 @@ export interface Route {
   q?: string
 }
 
-const VIEWS: View[] = ['overview', 'drafts', 'stale']
+const VIEWS: View[] = ['overview', 'drafts', 'stale', 'activity']
 
 function parseView(segment: string | undefined): View {
   return VIEWS.includes(segment as View) ? (segment as View) : 'overview'
