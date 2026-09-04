@@ -3,6 +3,17 @@
  * 8px body margin shows as a pale frame around the app. Sanity UI styles its
  * own components but never touches the document element.
  */
+/*
+ * Padding must count inside an element's declared width. Without this, the
+ * shell's max-width:100% plus its own padding measures 40px wider than the
+ * viewport and the page scrolls sideways.
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body,
 #root {

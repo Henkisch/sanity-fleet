@@ -14,7 +14,7 @@ import {assumedDataset, chooseDataset} from '../lib/datasets'
 import {usePrefs} from '../lib/PrefsContext'
 import {staleBefore} from '../lib/format'
 import {DRAFTS_QUERY, RECENT_QUERY, STALE_QUERY, type DocumentRow} from '../lib/queries'
-import {manageUrl, useStudioLookup} from '../lib/studios'
+import {manageUrl, useStudio} from '../lib/studios'
 import {DocumentList} from '../ui/DocumentList'
 import {ErrorBoundary} from '../ui/ErrorBoundary'
 import {CardSkeleton, UnavailableCard} from '../ui/primitives'
@@ -87,11 +87,7 @@ export function ProjectView({
 
         <Box flex={1} />
 
-        <ErrorBoundary fallback={() => <Button fontSize={1} mode="ghost" text="Open Studio" disabled />}>
-          <Suspense fallback={<Button fontSize={1} mode="ghost" text="Open Studio" disabled />}>
-            <OpenStudioButton projectId={projectId} dataset={dataset} />
-          </Suspense>
-        </ErrorBoundary>
+        <OpenStudioButton projectId={projectId} />
       </Flex>
 
       <TabList gap={2}>
@@ -179,13 +175,13 @@ function DatasetPicker({projectId}: {projectId: string}): JSX.Element {
   )
 }
 
-function OpenStudioButton({projectId, dataset}: {projectId: string; dataset: string}): JSX.Element {
-  const lookupStudio = useStudioLookup()
-  const studio = lookupStudio(projectId, dataset)
+function OpenStudioButton({projectId}: {projectId: string}): JSX.Element {
+  const studio = useStudio(projectId)
 
-  // Without a deployed Studio there is nowhere to send the user, so the button
-  // becomes a plain disabled control rather than a link to nothing.
-  if (!studio) return <Button fontSize={1} mode="ghost" text="No Studio deployed" disabled />
+  // Resolution is async rather than suspenseful, so the button starts disabled
+  // and becomes a link — it never blocks the panels behind it.
+  if (studio === undefined) return <Button fontSize={1} mode="ghost" text="Open Studio" disabled />
+  if (studio === null) return <Button fontSize={1} mode="ghost" text="No Studio deployed" disabled />
 
   return (
     <Button

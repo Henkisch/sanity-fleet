@@ -24,9 +24,20 @@ export function daysSince(iso: string | null | undefined, now = Date.now()): num
   return Math.floor(Math.max(0, now - then) / DAY)
 }
 
-/** ISO timestamp `days` in the past — the `$staleBefore` parameter for signal queries. */
+/**
+ * ISO timestamp `days` in the past — the `$staleBefore` parameter for the
+ * signal and stale queries.
+ *
+ * Floored to the start of the UTC day on purpose. The SDK keys its query cache
+ * on the query plus its parameters, so a cutoff computed from `Date.now()`
+ * would differ on every render: each render would key a new query, suspend,
+ * re-render, and key another one — an endless fetch loop that never settles.
+ * Day-granularity is also all this means: "untouched for 90 days" does not get
+ * more truthful at millisecond precision.
+ */
 export function staleBefore(days: number, now = Date.now()): string {
-  return new Date(now - days * DAY).toISOString()
+  const dayStart = Math.floor(now / DAY) * DAY
+  return new Date(dayStart - days * DAY).toISOString()
 }
 
 /** 1204 -> "1 204" (thin space, matches Sanity UI's number style). */

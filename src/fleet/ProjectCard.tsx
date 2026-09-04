@@ -8,7 +8,7 @@
  * `src/lib/datasets.ts`.
  */
 import {useQuery} from '@sanity/sdk-react'
-import {Box, Card, Flex, Inline, Stack, Text} from '@sanity/ui'
+import {Box, Card, Flex, Stack, Text} from '@sanity/ui'
 import {Suspense, type JSX, type ReactNode} from 'react'
 import {DRAFTS_ATTENTION_THRESHOLD} from '../config'
 import {assumedDataset} from '../lib/datasets'
@@ -66,35 +66,26 @@ function ProjectCardSignals({
   })
 
   const health = healthOf(data)
+  const needsAttention = health === 'attention'
 
   // The filter is applied here rather than in the grid: signals only exist once
   // the card has loaded, so the card is the only place that knows whether this
   // project needs attention.
-  if (prefs.attentionOnly && health !== 'attention') return null
+  if (prefs.attentionOnly && !needsAttention) return null
 
   return (
-    <CardFrame onClick={() => onOpen(project.id)}>
-      <Header
-        project={project}
-        dataset={dataset}
-        health={health}
-        title={health === 'attention' ? 'Drafts waiting' : 'Nothing waiting'}
-      />
-      <Inline gap={3}>
-        <Text size={1} weight={data.drafts > 0 ? 'semibold' : undefined}>
-          {formatCount(data.drafts)} drafts
-        </Text>
-        <Text size={1} muted>
-          {formatCount(data.stale)} stale
-        </Text>
-        <Text size={1} muted>
-          {formatCount(data.total)} docs
-        </Text>
-      </Inline>
+    <CardFrame onClick={() => onOpen(project.id)} needsAttention={needsAttention}>
+      <Header project={project} dataset={dataset} health={health} />
+      <Text size={1} weight={needsAttention ? 'semibold' : undefined} muted={!needsAttention}>
+        {data.drafts > 0
+          ? `${formatCount(data.drafts)} draft${data.drafts === 1 ? '' : 's'} waiting`
+          : 'Nothing waiting'}
+      </Text>
       <Text size={0} muted textOverflow="ellipsis">
-        {data.lastEdited
-          ? `Last edit ${relativeTime(data.lastEdited._updatedAt)} · ${data.lastEdited.title}`
-          : 'No documents yet'}
+        {[
+          `${formatCount(data.stale)} stale of ${formatCount(data.total)}`,
+          data.lastEdited ? `edited ${relativeTime(data.lastEdited._updatedAt)}` : 'no documents',
+        ].join(' · ')}
       </Text>
     </CardFrame>
   )
@@ -106,15 +97,34 @@ function healthOf(signals: ProjectSignals): Health {
   return signals.drafts >= DRAFTS_ATTENTION_THRESHOLD ? 'attention' : 'ok'
 }
 
-function CardFrame({onClick, children}: {onClick: () => void; children: ReactNode}) {
+function CardFrame({
+  onClick,
+  needsAttention = false,
+  children,
+}: {
+  onClick: () => void
+  needsAttention?: boolean
+  children: ReactNode
+}) {
   return (
     <Card
       as="button"
       onClick={onClick}
-      padding={4}
+      padding={3}
       radius={3}
       shadow={1}
-      style={{textAlign: 'left', width: '100%', height: '100%', cursor: 'pointer', minWidth: 0}}
+      style={{
+        textAlign: 'left',
+        width: '100%',
+        cursor: 'pointer',
+        minWidth: 0,
+        // Grid order, not a sort in the parent: a card's signals are only known
+        // after it has loaded, and lifting them into the grid would mean
+        // holding every project's data in one component and losing the
+        // per-project Suspense that keeps a slow project from blocking the rest.
+        order: needsAttention ? 0 : 1,
+        opacity: needsAttention ? 1 : 0.66,
+      }}
     >
       <Stack gap={3}>{children}</Stack>
     </Card>
@@ -125,12 +135,10 @@ function Header({
   project,
   dataset,
   health,
-  title,
 }: {
   project: FleetProject
   dataset: string
   health: Health
-  title: string
 }) {
   return (
     <Flex align="center" gap={3}>
@@ -144,7 +152,10 @@ function Header({
           </Text>
         </Stack>
       </Box>
-      <StatusDot health={health} title={title} />
+      <StatusDot
+        health={health}
+        title={health === 'attention' ? 'Drafts waiting' : 'Nothing waiting'}
+      />
     </Flex>
   )
 }
