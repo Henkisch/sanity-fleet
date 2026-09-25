@@ -37,7 +37,7 @@
     "@types/react": "^19.2.14",
     "eslint": "^10.8.1",
     "prettier": "^3.5",
-    "sanity": "^6.12.0",
+    "sanity": "^6.16.0",
     "typescript": "^5.8"
   },
   "packageManager": "pnpm@10.15.0"
